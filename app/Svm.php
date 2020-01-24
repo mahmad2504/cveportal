@@ -7,7 +7,7 @@ class SVM
 	function __construct()
 	{
 		$this->url = 'https://svm.cert.siemens.com/portal/api/v1';
-		$this->data_folder = "data/svm";
+		$this->data_folder = "data/svm/";
 	}
 	public function GetList($id)
 	{
@@ -176,8 +176,8 @@ class SVM
 		{
 			if(!array_key_exists($componentid,$data))
 			{	
-				$component = GetComponentDetails($componentid);
-				$notifications = GetNotifications($componentid);
+				$component = $this->GetComponentDetails($componentid);
+				$notifications = $this->GetNotifications($componentid);
 				$component->id = $componentid;
 				$component->notifications = $notifications;
 				$component->valid = 1;
@@ -193,6 +193,7 @@ class SVM
 	}
 	function getContentBycURL($strURL)
 	{
+		echo $strURL."\n";
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_HEADER, 0);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); // Return data inplace of echoing on screen
