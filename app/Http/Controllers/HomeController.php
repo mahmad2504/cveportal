@@ -1,14 +1,14 @@
 <?php
 
 namespace App\Http\Controllers;
+use \MongoDB\Client;
+use \MongoDB\BSON\UTCDateTime;
 
 use Auth;
 use App\User;
-use App\Utility;
-use Hash;
+
 use Illuminate\Http\Request;
-use App\Http\Controllers\Widgets\MilestoneController;
-use App\ProjectTree;
+use App\Products;
 
 class HomeController extends Controller
 {
@@ -17,10 +17,24 @@ class HomeController extends Controller
      *
      * @return void
      */
+	private $cache_datafolder = "../data/cache";
     public function __construct()
     {
-        //$this->middleware('auth');
+		
     }
+	public function GetProducts()
+	{
+		return  json_decode(file_get_contents($this->cache_datafolder."/products.json"));
+	}
+	public function GetProductCVEs($product_name)
+	{
+		return  json_decode(file_get_contents($this->cache_datafolder."/".$product_name.".json"));
+
+	}
+	public function GetLatestCVEs()
+	{
+		return  json_decode(file_get_contents($this->cache_datafolder."/latestcves.json"));
+	}
 	public function Index()
 	{
 		$data = [
@@ -71,6 +85,7 @@ class HomeController extends Controller
 		 ],
 		 
 		];
-		return view('home',compact('data'));
+		$products = $this->GetProducts();
+		return view('home',compact('products'));
 	}
 }

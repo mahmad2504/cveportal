@@ -155,6 +155,7 @@ class SVM
 		$data = $this->getContentBycURL($this->url.'/public/components/'.$component_id);	
 		return $data;
 	}
+	
 	function GetComponents($monitoring_list_id)
 	{
 		$folder = $this->data_folder.$monitoring_list_id;

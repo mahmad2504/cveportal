@@ -10,7 +10,7 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
+Route::get('/', 'HomeController@index'); 
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/cve/latest', 'HomeController@GetLatestCVEs')->name('cve.latest');
+Route::get('/cve/product/{product_name}', 'HomeController@GetProductCVEs')->name('cve.product');; 

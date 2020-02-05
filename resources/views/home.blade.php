@@ -26,6 +26,7 @@
 
 <link rel="stylesheet" href="{{ asset('tabulator/css/tabulator.min.css') }}" />
 
+
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=aljPzogMmq">
 <link rel="icon" type="image/png" href="/favicon-32x32.png?v=aljPzogMmq" sizes="32x32">
 <link rel="icon" type="image/png" href="/favicon-16x16.png?v=aljPzogMmq" sizes="16x16">
@@ -150,14 +151,21 @@ Products & Solutions
 <div class="card-header">
 <h2 class="text-uc text-gray-dark m-b-0">Products</h2>
 </div>
-<li class="list-group-item list-group-item-nav p-a-0">
+@for ($i = 0; $i < count($products); $i++)
+	<li class="list-group-item list-group-item-nav p-a-0">
+	<a class="productbutton" data-index="{{$i}}"  title="{{$products[$i]->name }}">{{$products[$i]->name }}</a>
+	</li>
+@endfor
+
+
+<!-- <li class="list-group-item list-group-item-nav p-a-0">
 <a href="/embedded-software/linux/" title="Mentor Embedded Linux Flex OS">Mentor Embedded Linux Flex OS</a>
 </li>
 <li class="list-group-item list-group-item-nav p-a-0">
 <a href="/embedded-software/linux/" title="Mentor Embedded Linux Omni OS">Mentor Embedded Linux Omni OS</a>
 </li>
 <li class="list-group-item list-group-item-nav p-a-0">
-<a href="/embedded-software/linux/" title="Mentor Embedded Linux Omni OS">Nucleus</a>
+<a href="/embedded-software/linux/" title="Mentor Embedded Linux Omni OS">Nucleus</a> -->
 </li>
 </div>
 <div class="card callout callout-callout">
@@ -190,9 +198,24 @@ Products & Solutions
 col-md-10
 col-xs-12 first-xs last-md content-main">
 <div class="card">
-<div class="card-header card-header-secondary text-inverse card-page-title">
-<h1><span>Vulnerabilities</span></h1>
+<div class="card-header card-header-secondary  card-page-title">
+
+<span style="color:white;font-size:20px;" id="title">Vulnerabilities</span>
+
+<select  id="select_product" style="margin-left:50px;float:none;">
+  <!-- <option value="all">Select Version</option>
+  <option value="saab">Saab</option>
+  <option value="mercedes">Mercedes</option>
+  <option value="audi">Audi</option>-->
+</select>
+<select  id="select_version" style="margin-left:10px;float:none;">
+  <option value="all">Select Version</option>
+  <option value="saab">Saab</option>
+  <option value="mercedes">Mercedes</option>
+  <option value="audi">Audi</option>
+</select>
 </div>
+
 <div class="card-block">
 <div class="row-container  ">
 <div class="row row-fluid ">
@@ -265,29 +288,105 @@ col-xs-12 first-xs last-md content-main">
 <script src="{{ asset('tabulator/js/tabulator.min.js') }}" ></script>
 <script>
 	//define data
-	var tabledata = [
-		{id:1, name:"Oli Bob", location:"United Kingdom", gender:"male", rating:1, col:"red", dob:"14/04/1984"},
-		{id:2, name:"Mary May", location:"Germany", gender:"female", rating:2, col:"blue", dob:"14/05/1982"},
-		{id:3, name:"Christine Lobowski", location:"France", gender:"female", rating:0, col:"green", dob:"22/05/1982"},
-		{id:4, name:"Brendon Philips", location:"USA", gender:"male", rating:1, col:"orange", dob:"01/08/1980"},
-		{id:5, name:"Margret Marmajuke", location:"Canada", gender:"female", rating:5, col:"yellow", dob:"31/01/1999"},
-		{id:6, name:"Frank Harbours", location:"Russia", gender:"male", rating:4, col:"red", dob:"12/05/1966"},
-		{id:7, name:"Jamie Newhart", location:"India", gender:"male", rating:3, col:"green", dob:"14/05/1985"},
-		{id:8, name:"Gemma Jane", location:"China", gender:"female", rating:0, col:"red", dob:"22/05/1982"},
-		{id:9, name:"Emily Sykes", location:"South Korea", gender:"female", rating:1, col:"maroon", dob:"11/11/1970"},
-		{id:10, name:"James Newman", location:"Japan", gender:"male", rating:5, col:"red", dob:"22/03/1998"},
+	var products = @json($products);
+	var selected_product_index = -1; 
+	
+	function CreateTable(url,columns)
+	{
+		var table = new Tabulator("#vulnerability-table", {
+			columns:columns,
+			pagination:"local",
+			paginationSize:10,
+			//autoColumns:true,
+			ajaxURL:url
+		});
+	}
+	function Set3Columns()
+	{
+		columns = [
+        {title:"CVE", field:"cve", sorter:"string", width:130},
+		{title:"Description", field:"description", sorter:"string", width:700},
+		{title:"Updated", field:"modified", sorter:"string", width:100}
 	];
+		return columns;
+	}
+	function Set4Columns()
+	{
+		columns = [
+			{title:"CVE", field:"cve", sorter:"string", width:130},
+			{title:"Description", field:"description", sorter:"string", width:600},
+			{title:"Status", field:"status", sorter:"string", width:100},
+			{title:"Modified", field:"modified", sorter:"string", width:100}
+		];
+		return columns;
+	}
+	function UpdateProductSelect()
+	{
+		if(selected_product_index >= 0)
+		{
+			product = products[index];
+			$('#select_product').children().remove();
+			addOption('select_product','All Products','all',0);
+			for(i=0;i<products.length;i++)
+			{
+				if(product.name == products[i].name)
+					addOption('select_product',products[i].name,products[i].name,1);
+				else
+					addOption('select_product',products[i].name,products[i].name,0);
+			}
+		}
+		else
+		{
+			$('#select_product').children().remove();
+			addOption('select_product','All Products','all',1);
+			for(i=0;i<products.length;i++)
+			{
+				addOption('select_product',products[i].name,products[i].name,0);
+			}
+		}
+	}
+	$('#select_product').on('change', function() {
+		product_name = this.value;
+		columns = Set4Columns();
+		url = "/cve/product/"+product_name;
+		console.log(product_name);
+		if(product_name == 'all')
+		{
+			url="{{route('cve.latest')}}";
+			columns = Set3Columns();
+		}
+		CreateTable(url,columns);
+	});
 
+	$('.productbutton').on( "click", function() 
+	{
+		index = $(this).attr('data-index');
+		selected_product_index = index;
+		product = products[index];
+		UpdateProductSelect();
+		columns = Set4Columns();
+		url:"/cve/product/"+product.name
+		CreateTable(url,columns);
+		
+	});
+	Set3Columns();
+
+	//$('#title').text("Latest Updated Vulnerabilities");
 	$(document).ready(function()
 	{
 		console.log("Vulnerability Page Loaded");
-		//define table
-		var table = new Tabulator("#vulnerability-table", {
-			data:tabledata,
-			autoColumns:true,
-		});
+		columns = Set3Columns();
+		url="{{route('cve.latest')}}" 
+		CreateTable(url,columns);
+		UpdateProductSelect();
 	
 	});
+	function addOption(id,optionText,optionValue,selected) { 
+		if(!selected)
+			$('#'+id).append(`<option value="${optionValue}"> ${optionText} </option>`); 
+		else							
+			$('#'+id).append(`<option value="${optionValue}" selected> ${optionText} </option>`);							
+        } 
 </script>
 </body>
 </html>
