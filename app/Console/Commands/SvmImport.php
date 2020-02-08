@@ -45,13 +45,37 @@ class SvmImport extends Command
 	{
 		 parent::__construct();
 	}
+	public function rrmdir($dir) 
+	{
+		if (is_dir($dir)) 
+		{
+			$objects = scandir($dir);
+			foreach ($objects as $object) 
+			{
+				if ($object != "." && $object != "..") 
+				{
+					if (filetype($dir."/".$object) == "dir") 
+						$this->rrmdir($dir."/".$object); 
+					else 
+						unlink   ($dir."/".$object);
+				}
+			}
+			reset($objects);
+			rmdir($dir);
+		}
+	}
     public function Init()
     {
 		ini_set("memory_limit","2000M");
 		set_time_limit(2000);
 		
+		$this->rrmdir($this->cache_datafolder);
+		
 		if(!file_exists($this->datafolder))
 			mkdir($this->datafolder, 0, true);
+		if(!file_exists($this->cache_datafolder))
+			mkdir($this->cache_datafolder, 0, true);
+		
 		if(!file_exists($this->cache_datafolder))
 			mkdir($this->cache_datafolder, 0, true);
 		
@@ -144,9 +168,15 @@ class SvmImport extends Command
 						
 						$this->cves[$cve]->nvd->cvss = null;
 						if(isset($cve_nvd_data['impact']['baseMetricV3']))
+						{
 							$this->cves[$cve]->nvd->cvss  =  iterator_to_array($cve_nvd_data['impact']['baseMetricV3']['cvssV3']);
+							//$this->cves[$cve]->nvd->cvssv3 = iterator_to_array($cve_nvd_data['impact']['baseMetricV3']['cvssV3']);
+						}
 						else if(isset($cve_nvd_data['impact']['baseMetricV2']))
+						{
 							$this->cves[$cve]->nvd->cvss  =  iterator_to_array($cve_nvd_data['impact']['baseMetricV2']['cvssV2']);
+							//$this->cves[$cve]->nvd->cvssv2 = iterator_to_array($cve_nvd_data['impact']['baseMetricV2']['cvssV2']);
+						}
 						
 						//echo $cve_nvd_data['cve']['CVE_data_meta']['ID'];
 						//dump($this->cves[$cve]->nvd);
@@ -186,8 +216,17 @@ class SvmImport extends Command
 						}
 					}
 				}
+				$status = $this->GetCVETriageStatus($cve,$product->name,$product->version);
+				$this->cves[$cve]->product[$product_id]->status = $status;
+				
+			}
 			}
 		}
+	public function GetCVETriageStatus($cve,$product_name,$product_version)
+	{
+		if($cve == 'CVE-2019-8457')
+			return 'Fixed';
+		return 'Vulnerable';
 	}
 	public function GetProductDetails($product_id)
 	{
@@ -239,7 +278,6 @@ class SvmImport extends Command
 		$cvedate = [];
 		foreach($cves as $record)
 		{
-			
 			$cve = new \StdClass();
 			$cve->cve = $record->cve;
 			if($record->nvd == null)
@@ -247,36 +285,116 @@ class SvmImport extends Command
 				
 			$cve->description = $record->nvd->description;
 			$cve->modified = $record->nvd->lastModifiedDate;
+			$cve->published = $record->nvd->publishedDate;
+			$cve->product = $record->product;
+			$cve->cvss = $record->nvd->cvss;
+			/*if(isset($record->nvd->cvssv3))
+				$cve->cvssv3 = $record->nvd->cvssv3;
+					
+			if(isset($record->nvd->cvssv2))
+				$cve->cvssv2 = $record->nvd->cvssv2;*/
 			$cvedate[] = $cve;
 		}
-		file_put_contents($this->cache_datafolder."/latestcves.json",json_encode($cvedate));
+		file_put_contents($this->cache_datafolder."/allcve.json",json_encode($cvedate));
 	}
 	public function CacheProductCves()
 	{
 		$options = [
 			'sort' => ['nvd.lastModifiedDate' => -1],
-			
+			'projection'=>
+					["_id"=>0,
+					"nvd.description"=>1,
+					"nvd.lastModifiedDate"=>1,
+					"nvd.publishedDate"=>1,
+					"nvd.cvss"=>1,
+					"nvd.cvssv3"=>1,
+					"nvd.cvssv2"=>1,
+					"product.name"=>1,
+					"product.version"=>1,
+					"product.status"=>1,
+					"product.component.name"=>1,
+					"product.component.version"=>1,
+					"cve"=>1]
 		];
+		$donelist = [];
 		foreach($this->products as $product)
 		{
+			if(!array_key_exists($product->name,$donelist))
+			{
 			$query = ['product.name'=>$product->name];
 			$cves = $this->db->cves->find($query,$options)->toArray();
 			
-			$cvedate = [];
+				$cvedata = [];
+				foreach($cves as $record)
+				{
+					$cve = new \StdClass();
+					$cve->cve = $record->cve;
+					if(!isset($record->nvd))
+						continue;
+					if($record->nvd==null)
+						continue;
+					
+					$cve->description = $record->nvd->description;
+					$cve->modified = $record->nvd->lastModifiedDate;
+					$cve->published = $record->nvd->publishedDate;
+					$cve->cvss = $record->nvd->cvss;
+					/*if(isset($record->nvd->cvssv3))
+						$cve->cvssv3 = $record->nvd->cvssv3;
+					
+					if(isset($record->nvd->cvssv2))
+						$cve->cvssv2 = $record->nvd->cvssv2;*/
+					
+					$cve->product = $record->product;
+					$cvedata[] = $cve;
+				}
+				$folder_name = $this->cache_datafolder."/".$product->name;
+				if(!file_exists($folder_name))
+					mkdir($folder_name, 0, true);
+				
+				file_put_contents($folder_name."/cve.json",json_encode($cvedata));
+				$donelist[$product->name]=$product->name;
+			}
+			$query = ['product.name'=>$product->name,'product.version'=>$product->version];
+			$cves = $this->db->cves->find($query,$options)->toArray();
+			$cvedata = [];
 			foreach($cves as $record)
 			{
 				
 				$cve = new \StdClass();
 				$cve->cve = $record->cve;
-				if($record->nvd == null)
+				if(!isset($record->nvd))
+					continue;
+				if($record->nvd==null)
 					continue;
 				
 				$cve->description = $record->nvd->description;
 				$cve->modified = $record->nvd->lastModifiedDate;
-				$cve->status = "Vulnerable";
-				$cvedate[] = $cve;
+				$cve->published = $record->nvd->publishedDate;
+				$cve->cvss = $record->nvd->cvss;
+				/*if(isset($record->nvd->cvssv3))
+					$cve->cvssv3 = $record->nvd->cvssv3;
+					
+				if(isset($record->nvd->cvssv2))
+					$cve->cvssv2 = $record->nvd->cvssv2;*/
+		
+				foreach($record->product as $p)
+				{
+
+					if(($p->name == $product->name)&&($p->version==$product->version))
+					{
+						$cve->status = $p->status;
+						$p->this = 1;
+					}
+				}
+				$cve->product = $record->product;
+				//$cve->status = "Vulnerable";
+				$cvedata[] = $cve;
 			}
-			file_put_contents($this->cache_datafolder."/".$product->name.".json",json_encode($cvedate));
+			$folder_name = $this->cache_datafolder."/".$product->name."/".$product->version;
+			if(!file_exists($folder_name))
+				mkdir($folder_name, 0, true);
+				
+			file_put_contents($folder_name."/cve.json",json_encode($cvedata));
 		}
 		//dump($cves);
 	}

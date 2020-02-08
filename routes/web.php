@@ -12,5 +12,5 @@
 */
 Route::get('/', 'HomeController@index'); 
 
-Route::get('/cve/latest', 'HomeController@GetLatestCVEs')->name('cve.latest');
-Route::get('/cve/product/{product_name}', 'HomeController@GetProductCVEs')->name('cve.product');; 
+Route::get('/cve', 'HomeController@GetLatestCVEs')->name('cve.all');
+Route::get('/cve/product/{product_name}/{version_name?}', 'HomeController@GetProductCVEs')->name('cve.product'); 

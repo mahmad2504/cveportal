@@ -26,65 +26,30 @@ class HomeController extends Controller
 	{
 		return  json_decode(file_get_contents($this->cache_datafolder."/products.json"));
 	}
-	public function GetProductCVEs($product_name)
+	public function GetProductCVEs($product_name,$version_name='all')
 	{
-		return  json_decode(file_get_contents($this->cache_datafolder."/".$product_name.".json"));
-
+		ob_start('ob_gzhandler');
+		if($version_name == 'all')
+		{
+			if(!file_exists($this->cache_datafolder."/".$product_name."/cve.json"))
+				return [];
+			return file_get_contents($this->cache_datafolder."/".$product_name."/cve.json");
+		}
+		else
+		{
+			if(!file_exists($this->cache_datafolder."/".$product_name."/".$version_name."/cve.json"))
+				return [];
+			return file_get_contents($this->cache_datafolder."/".$product_name."/".$version_name."/cve.json");
+		}
 	}
 	public function GetLatestCVEs()
 	{
-		return  json_decode(file_get_contents($this->cache_datafolder."/latestcves.json"));
+		ob_start('ob_gzhandler');
+		return file_get_contents($this->cache_datafolder."/allcve.json");
 	}
 	public function Index()
 	{
-		$data = [
-		 [
-		  "id"=>"1",
-		  "name"=>"MEL Flex",
-		  "parent_id"=>"0"
-		 ], 
-		 [
-		  "id"=>"2",
-		  "name"=>"MEL Omni",
-		  "parent_id"=>"0"
-		 ], 
-		 [
-		  "id"=>"3",
-		  "name"=>"MEL Nucleus",
-		  "parent_id"=>"0"
-		 ], 
-		 [
-		  "id"=>"4",
-		  "name"=>"1.0",
-		  "parent_id"=>"1"
-		 ], 
-		 [
-		  "id"=>"5",
-		  "name"=>"1.1",
-		  "parent_id"=>"1"
-		 ], 
-		 [
-		  "id"=>"6",
-		  "name"=>"1.0.0",
-		  "parent_id"=>"2"
-		 ], 
-		 [
-		  "id"=>"7",
-		  "name"=>"1.1.2",
-		  "parent_id"=>"2"
-		 ], 
-		 [
-		  "id"=>"8",
-		  "name"=>"4.0",
-		  "parent_id"=>"3"
-		 ], 
-		 [
-		  "id"=>"9",
-		  "name"=>"4.1",
-		  "parent_id"=>"3"
-		 ],
-		 
-		];
+
 		$products = $this->GetProducts();
 		return view('home',compact('products'));
 	}
