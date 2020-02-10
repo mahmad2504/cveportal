@@ -1,0 +1,92 @@
+.collapse {
+    display: none;
+}
+
+.collapse.in {
+    display: block;
+}
+
+.collapsing {
+    position: relative;
+    height: 0;
+    overflow: hidden;
+    transition-timing-function: ease;
+    transition-duration: .15s;
+    transition-property: height;
+}
+
+.fa,
+.icon-cancel-3 {
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    background-size: cover;
+    display: inline-block;
+    height: 16px;
+    width: 16px;
+    vertical-align: -.1em;
+}
+
+.fa-home,
+.fa-search,
+.fa-calendar-o,
+.fa-th,
+.fa-align-justify,
+.fa-chevron-left,
+.fa-chevron-right,
+.fa-map-marker,
+.icon-cancel-3 {
+    font-family: Arial !important;
+}
+
+.fa-home {
+    background-image: url(https://s3.amazonaws.com/images.mentor.com/svg/home.svg);
+    height: 12px;
+    width: 12px;
+}
+
+.fa-search {
+    background-image: url(https://s3.amazonaws.com/images.mentor.com/svg/magnify.svg);
+}
+
+.fa-calendar-o {
+    background-image: url(https://s3.amazonaws.com/images.mentor.com/svg/calendar-white.svg);
+}
+
+.fa-th,
+.fa-align-justify {
+    height: 14px;
+    width: 14px;
+    vertical-align: 0;
+    position: relative;
+    top: 2px;
+}
+
+.fa-th {
+    background-image: url(https://s3.amazonaws.com/images.mentor.com/svg/grid.svg);
+}
+
+.fa-align-justify {
+    background-image: url(https://s3.amazonaws.com/images.mentor.com/svg/menu.svg);
+}
+
+.fa-chevron-left {
+    background-image: url(https://s3.amazonaws.com/images.mentor.com/svg/chevron-left.svg);
+}
+
+.fa-chevron-right {
+    background-image: url(https://s3.amazonaws.com/images.mentor.com/svg/chevron-right.svg);
+}
+
+.viewer-items-navigation .fa-chevron-left {
+    background-image: url(https://s3.amazonaws.com/images.mentor.com/svg/chevron-left-inverse.svg);
+}
+
+.viewer-items-navigation .fa-chevron-right {
+    background-image: url(https://s3.amazonaws.com/images.mentor.com/svg/chevron-right-inverse.svg);
+}
+
+.fa-map-marker { display: none; }
+
+.icon-cancel-3 {
+    background-image: url(https://s3.amazonaws.com/images.mentor.com/svg/close-black.svg);
+}

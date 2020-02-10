@@ -3,45 +3,45 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use \MongoDB\Client;
+use \MongoDB\BSON\UTCDateTime;
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+
 use App\svm;
 use App\Products;
+use App\Cve;
 use App;
-class ProductImport extends Command
+use Artisan;
+class CacheUpdate extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'product:import';
+
+	protected $signature = 'cache:update';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Import Product Name and Version in database';
+    protected $description = 'Command description';
 
     /**
      * Create a new command instance.
      *
      * @return void
      */
-    public function __construct()
-    {
+	public function __construct()
+	{
 		parent::__construct();
-    }
-
-    /**
-     * Execute the console command.
-     *
-     * @return mixed
-     */
+	}
 	
     public function handle()
     {
 		$products = new Products();
-		$products->Import();
 		$products->CacheUpdate();
+        $cve = new CVE();
+		$cve->CacheUpdate();
+		
     }
 }

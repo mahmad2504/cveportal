@@ -22,10 +22,11 @@
 <meta name="Section" id="Section" content="" />
 <link rel="alternate" type="application/rss+xml" title="RSS" href="/embedded-software/feed/">
 <meta name="bn_designarea" content="3b3d43ac-bb64-4e78-94c5-f0f27d550ce0" />
-<link type="text/css" rel="stylesheet" href="https://static.mentor-cdn.com/css/mgc/generated/prod/v259/mgc_agg.css" />
+<link type="text/css" rel="stylesheet" href="{{ asset('css/mgc_agg.css') }}" />
 
 <link rel="stylesheet" href="{{ asset('tabulator/css/tabulator.min.css') }}" />
-<link rel="stylesheet" type="text/css" href="https://static.mentor-cdn.com/common/css/mgc-icons-legacy.css" />
+<link type="text/css" rel="stylesheet" href="{{ asset('css/mgc-icons-legacy.css') }}" />
+
 <style>
 
 /* The Modal (background) */
@@ -358,7 +359,7 @@ col-xs-12 first-xs last-md content-main">
 <div id="mgc-player" class="mgc-player"></div>
 </div>
 <!-- //// MGC PAGE END //// -->
-<script src="https://static.mentor-cdn.com/common/js/svg.js"></script>
+<script src="{{ asset('js/svg.js') }}"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 <script src="{{ asset('tabulator/js/tabulator.min.js') }}" ></script>
 <script>
@@ -474,7 +475,7 @@ col-xs-12 first-xs last-md content-main">
         {title:"CVE", field:"cve", sorter:"string", width:130},
 		{title:"Description", field:"description", sorter:"string", width:700},
 		{title:"Updated", field:"modified", sorter:"string", width:100}
-	];
+		];
 		return columns;
 	}
 	function Set4Columns()
@@ -541,12 +542,12 @@ col-xs-12 first-xs last-md content-main">
 		if(version_name == 'all')
 		{
 			columns = Set3Columns();
-			url = "/cve/product/"+product_name;
+			url = "/cve/"+product_name;
 		}
 		else
 		{
 			columns = Set4Columns();
-			url = "/cve/product/"+product_name+"/"+version_name;
+			url = "/cve/"+product_name+"/"+version_name;
 		}
 		CreateTable(url,columns);
 	});
@@ -560,7 +561,7 @@ col-xs-12 first-xs last-md content-main">
 			
 		}
 		columns = Set3Columns();
-		url = "/cve/product/"+product_name;
+		url = "/cve/"+product_name;
 		console.log(product_name);
 		if(product_name == 'all')
 		{
@@ -578,7 +579,7 @@ col-xs-12 first-xs last-md content-main">
 		product = products[index];
 		UpdateProductSelect();
 		columns = Set3Columns();
-		url:"/cve/product/"+product.name
+		url:"/cve/"+product.name
 		CreateTable(url,columns);
 		
 	});
@@ -607,7 +608,7 @@ col-xs-12 first-xs last-md content-main">
 			$('#'+id).append(`<option value="${optionValue}"> ${optionText} </option>`); 
 		else							
 			$('#'+id).append(`<option value="${optionValue}" selected> ${optionText} </option>`);							
-        } 
+    } 
 </script>
 </body>
 </html>

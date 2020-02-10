@@ -1,22 +1,53 @@
 <?php
 namespace App;
+use \MongoDB\Client;
+use \MongoDB\BSON\UTCDateTime;
+use App;
 class SVM
 {
-	private $url;
-	private $data_folder;
+	private $url='https://svm.cert.siemens.com/portal/api/v1';
+	private $datafolder = "data/svm";
+	private $cache_datafolder = "data/cache";
 	function __construct()
-	{
-		$this->url = 'https://svm.cert.siemens.com/portal/api/v1';
-		$this->data_folder = "data/svm/";
+	{		
+		if(!App::runningInConsole())
+		{
+			$this->datafolder = "../".$this->datafolder;
+			$this->cache_datafolder = "../".$this->cache_datafolder;
+		}
+		if(!file_exists($this->datafolder))
+			mkdir($this->datafolder, 0, true);
+		if(!file_exists($this->cache_datafolder))
+			mkdir($this->cache_datafolder, 0, true);
 	}
-	public function GetList($id)
+	public function InitDb()
+	{	$dbname = config('database.connections.mongodb.database');
+		$mongoClient=new Client("mongodb://".config('database.connections.mongodb.host'));
+		$this->db = $mongoClient->$dbname;
+	}
+	private function GetList($id)
 	{
-		$path=$this->data_folder.$id."/components_cve.json";
+		$path=$this->datafolder."/".$id."/components_cve.json";
 		if(!file_exists($path))
 			return null;
 		$list = json_decode(file_get_contents($path),true);
 		return $list;
 	}
+	public function ImportProduct($id)
+	{
+		ini_set("memory_limit","2000M");
+		set_time_limit(0);
+		$this->InitDb();
+		$list = $this->GetList($id);
+		if($list == null)
+			return -1;
+		$list = array_values($list);
+		$collectionname = $id;
+		$this->db->$collectionname->drop();
+		$this->db->$collectionname->insertMany($list);	
+		return 0;		
+	}
+	
 	public function Sync($monitorin_list_id)
 	{
 		$notifications = $this->GetAllNotifications($monitorin_list_id);
