@@ -108,7 +108,7 @@ class SVM
 			}
 			$component->cve = array_values($component->cve);
 		}
-		$folder = $this->data_folder.$monitorin_list_id;
+		$folder = $this->datafolder.$monitorin_list_id;
 		if (!file_exists($folder))
 		{
 			mkdir($folder, 0777, true);
@@ -135,7 +135,7 @@ class SVM
 	
 	function GetAllNotifications($monitoring_list_id)
 	{
-		$folder = $this->data_folder.$monitoring_list_id;
+		$folder = $this->datafolder.$monitoring_list_id;
 		
 		if (!file_exists($folder))
 		{
@@ -189,7 +189,7 @@ class SVM
 	
 	function GetComponents($monitoring_list_id)
 	{
-		$folder = $this->data_folder.$monitoring_list_id;
+		$folder = $this->datafolder.$monitoring_list_id;
 		
 		if (!file_exists($folder))
 		{
