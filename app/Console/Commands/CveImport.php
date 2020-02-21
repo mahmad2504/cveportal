@@ -12,6 +12,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\svm;
 use App\Products;
 use App\Cve;
+use App\Cache;
 use App;
 use Artisan;
 class CveImport extends Command
@@ -39,7 +40,7 @@ class CveImport extends Command
     public function handle()
     {
         $cve = new CVE();
-		$cve->import();
-		$cve->CacheUpdate();
+	$cve->import();
+	Cache::Clean();
     }
 }

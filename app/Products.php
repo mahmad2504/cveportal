@@ -6,94 +6,100 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 use \MongoDB\Client;
 use \MongoDB\BSON\UTCDateTime;
+use \MongoDB\BSON\Regex;
 use App;
 
 class Products
 {
-	private $products = [];
 	private $datafolder = "data/svm";
-	private $cache_datafolder = "data/cache";
 	private $db = null;
-	function __construct()
+	private $admin=null;
+	function __construct($admin=null)
 	{
-		
 		if(!App::runningInConsole())
 		{
 			$this->datafolder = "../".$this->datafolder;
-			$this->cache_datafolder = "../".$this->cache_datafolder;
 		}
-		if(!file_exists($this->datafolder))
-			mkdir($this->datafolder, 0, true);
-		if(!file_exists($this->cache_datafolder))
-			mkdir($this->cache_datafolder, 0, true);
+		$this->admin = $admin;
 	}
 	public function InitDb()
 	{	$dbname = config('database.connections.mongodb.database');
 		$mongoClient=new Client("mongodb://".config('database.connections.mongodb.host'));
 		$this->db = $mongoClient->$dbname;
 	}
-	public function Get()
-	{
-		$this->InitDb();
-		$query = [];
-		$cursor = $this->db->products->find($query);
-		$products = $cursor->toArray();
-		return $products; 		
-	}
-	public function GetIds()
-	{
-		$products = $this->Get();
-		$product_by_name = [];
-		foreach($products as $product)
-		{
-			$product_by_name[$product->name][$product->id] = $product->id;
-		}
-		return $product_by_name;
-	}
-	public function GetByIds()
-	{
-		$products = $this->Get();
-		$product_by_ids = [];
-		foreach($products as $product)
-		{
-			$product_by_ids[$product->id] = $product;
-		}
-		return $product_by_ids;
-	}
-	public function CacheUpdate()
-	{
-		$this->InitDb();
-		$query = [];
-		$cursor = $this->db->products->find($query);
-		$products = $cursor->toArray();
 
-		$product_data = [];
+	public function GetVersionNames($groupsname=null,$productname)
+	{
+		$products = $this->GetProducts($groupsname,$productname);
+		$versions = [];
 		foreach($products as $product)
 		{
-			
-			if(array_key_exists($product->name,$product_data))
-			{
-				$index = "-".$product->version;
-				$product_data[$product->name]->version[$index]=new \StdClass();
-				$product_data[$product->name]->version[$index]->version = $product->version;
-				$product_data[$product->name]->version[$index]->id = $product->id;
-			}
-			else
-			{
-				$index = "-".$product->version;
-				$product_data[$product->name] =  new \StdClass();
-				$product_data[$product->name]->name = $product->name;
-				$product_data[$product->name]->version[$index]=new \StdClass();
-				$product_data[$product->name]->version[$index]->version = $product->version;
-				$product_data[$product->name]->version[$index]->id = $product->id;
-				
-			}
+			$versions[$product->version] = $product->version;	
 		}
-		$product_data = array_values($product_data);
-		foreach($product_data as $product)
-			$product->version = array_values($product->version);
-			
-		file_put_contents($this->cache_datafolder."/products.json",json_encode($product_data));
+		return array_values($versions);
+	}
+	public function GetProductNames($groupsname=null)
+	{
+		$products = $this->GetProducts($groupsname);
+		$names = [];
+		foreach($products as $product)
+		{
+			$names[$product->name] = $product->name;	
+		}
+		return array_values($names);
+	}
+	public function GetGroupNames()
+	{
+		$products = $this->GetProducts();
+		$groups = [];
+		foreach($products as $product)
+		{
+			$groups[$product->group] = $product->group;	
+		}
+		return array_values($groups);
+	}
+	public function GetIds($groupname=null,$productname=null,$versionname=null)
+	{
+		$products = $this->GetProducts($groupname,$productname,$versionname);
+		$ids = [];
+		foreach($products as $product)
+		{
+			$ids[$product->id] = $product->id;	
+		}
+		return array_values($ids);
+	}
+	public function GetProduct($id)
+	{
+		$this->InitDb();
+		$query['id'] = new Regex(preg_quote($id), 'i');
+		$options = [
+			'projection'=>
+					["_id"=>0,
+					]
+		];
+		return $this->db->products->findOne($query,$options);
+	}
+	public function GetProducts($groupname=null,$productname=null,$versionname=null)
+	{
+		$query = [];
+		$this->InitDb();
+		if($groupname!=null)
+			$query['group'] = new Regex(preg_quote($groupname), 'i');
+		if($productname!=null)
+			$query['name'] = new Regex(preg_quote($productname), 'i');
+		if($versionname!=null)
+			$query['version'] = new Regex(preg_quote("".$versionname), 'i');	
+		if($this->admin!=null)
+			$query['admin'] = new Regex(preg_quote("".$this->admin), 'i');
+		
+		$options = [
+			'projection'=>
+					["_id"=>0,
+					]
+		];
+		
+		$list = $this->db->products->find($query,$options)->toArray();
+		return $list;
 	}
 	public function Import()
 	{
@@ -106,6 +112,7 @@ class Products
 
 		$i=0;
 		$products = [];
+		$database = [];
 		foreach($data as $row)
 		{
 			
@@ -116,17 +123,28 @@ class Products
 			$row = $data[$i];
 			
 			
-			$row['id'] = $row['A'];
-			$row['name'] = $row['B'];
-			$row['version'] = $row['C'];
-			$row['valid'] = 0;
+			$id = $row['A'];
+			$group = $row['B'];
+			$name = $row['C'];
+			$version = $row['D'];
+			$admins = explode(",",$row['E']);
 			
-			unset($row['A']);unset($row['B']);unset($row['C']);
-			$product = (object)($row);
-			$products[$product->id] = $product;
+			$product=new \StdClass();
+			$product->id = $id;
+			$product->group = $group;
+			$product->name =  $name;
+			$product->version = "".$version;
+			$product->admin = $admins;
+			$database[] = $product;
 		}
 		$this->db->products->drop();
-		$this->db->products->insertMany(array_values($products));	
-		$this->CacheUpdate();
+		$data = [];
+		$data[] = $products;
+		$this->db->products->insertMany($database);
+		/*dump($this->GetProducts(null,null,'1.0'));
+		dump(implode(",",$this->GetIds(null,null,'1.0')));
+		dump($this->GetGroupNames());
+		dump($this->GetProductNames('MEL Omni OS'));
+		dump($this->GetVersionNames('MEL flex OS','BSP IMX6'));*/
 	}
 }

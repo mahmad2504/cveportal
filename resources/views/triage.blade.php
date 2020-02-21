@@ -134,23 +134,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 </div>
 <div id="user" class="header-main-ancillary m-l-auto text-inverse user">
     <div>
-        <svg class="icon icon-user icon-circle-border" aria-hidden="true"><use xlink:href="#icon-user"></use></svg> <a href='https://www.mentor.com/authzero_signup?next=https%3A%2F%2Fwww%2Ementor%2Ecom%2Fembedded%2Dsoftware%2Fiot%2Fsecurity&language=English&login=1'>Sign In</a> | <a href='https://www.mentor.com/authzero_signup?next=https%3A%2F%2Fwww%2Ementor%2Ecom%2Fembedded%2Dsoftware%2Fiot%2Fsecurity'>Create Account</a>
+        <svg class="icon icon-user icon-circle-border" aria-hidden="true"><use xlink:href="#icon-user"></use></svg> <a href=''>{{$displayname}}</a> | <a href="{{route('logout')}}">Logout</a>
     </div>
 </div>
-<nav class="header-main-navigation navbar-primary" id="primary">
-<ul>
-<li class="products" id="navbar-products">
-<a href="https://mentor.com/products/" title="Products">
-<i class="menu-icon menu-icon-animated position-relative m-r-sm" style="top: -3px;"><span></span></i>
-Products & Solutions
-</a>
-<li class="training"><a href="https://mentor.com/training/" title="Training and Services">Training</a></li>
-<li class="services"><a href="https://mentor.com/training-and-services/" title="Training and Services">Services</a></li>
-<li class="company"><a href="/company/" title="Company">Company</a></li>
-<li class="blogs"><a href="https://mentor.com/blogs/" title="Blogs">Blogs</a></li>
-<li class="support"><a href="https://mentor.com/support/" title="Support">Support</a></li>
-</ul>
-</nav>
 </header>
 <div class="primary-dropdown bg-gray-lightest" id="nav-products">
 <div class="container p-t-lg p-b">
@@ -161,21 +147,12 @@ Products & Solutions
 <div class="container">
 <div class="row row-flex middle-lg">
 <div class="col-md-9 col-xs-12">
-<div id="section">
+<div id="section" >
 <a href="#" title="Security Vulnerabilities">Security Vulnerability Database</a>
 </div>
 </div>
 <div class="col-md-3 col-xs-12">
-<div id="search">
-<form id="searchbox" action="https://www.mentor.com/embedded-software/search/">
-<div class="search-box input-group">
-<input type="text" id="searchTerm" class="form-control bg-transparent text-inverse p-x-0" autocomplete="off" name="query" data-dauuid="3b3d43ac-bb64-4e78-94c5-f0f27d550ce0" placeholder="Search Mentor.com" value="" rel="Search Mentor.com" />
-<span class="input-group-btn">
-<button type="submit" class="searchbutton btn bg-transparent text-inverse p-x-0"><svg class="icon icon-search2" aria-hidden="true"><use xlink:href="#icon-search2"></use></svg></button>
-</span>
-</div>
-</form>
-</div>
+
 </div>
 </div>
 </div>
@@ -201,7 +178,12 @@ Products & Solutions
 </li>
 <li class="breadcrumb3 first">
 <a href="#">
-<span>Security Vulnerabilities</span>
+<span >Security Vulnerabilities</span>
+</a>
+</li>
+<li class="breadcrumb2 second">
+<a href="#">
+<span >Triage</span>
 </a>
 </li>
 <!-- <li class="breadcrumb4 last current">
@@ -218,69 +200,10 @@ Products & Solutions
 <br>
 
 <div class="row row-flex content-container">
-<div id="sidebar" class="col-md-2 col-xs-12 last-xs first-md content-sidebar">
-<h2 class="hidden-lg-up header-group"><span><a href="#" title="Security Vulnerabilities">Security Vulnerabilities</a></span></h2>
-<div class=" ">
-
-
-
-
-</div>
-
-<div class="card callout callout-callout">
-<div class="card-header">
-<h2 class="text-uc text-gray-dark m-b-0">Products</h2>
-</div>
-@for ($i = 0; $i < count($group_names); $i++)
-	<li class="list-group-item list-group-item-nav p-a-0">
-	<a class="productbutton" data-index="{{$i}}"  title="{{$group_names[$i]}}">{{$group_names[$i]}}</a>
-	</li>
-@endfor
-
-
-<!-- <li class="list-group-item list-group-item-nav p-a-0">
-<a href="/embedded-software/linux/" title="Mentor Embedded Linux Flex OS">Mentor Embedded Linux Flex OS</a>
-</li>
-<li class="list-group-item list-group-item-nav p-a-0">
-<a href="/embedded-software/linux/" title="Mentor Embedded Linux Omni OS">Mentor Embedded Linux Omni OS</a>
-</li>
-<li class="list-group-item list-group-item-nav p-a-0">
-<a href="/embedded-software/linux/" title="Mentor Embedded Linux Omni OS">Nucleus</a> -->
-</li>
-</div>
-<div class="card callout callout-callout">
-<div class="card-header">
-<h2 class="text-uc text-gray-dark m-b-0">Contact Embedded</h2>
-</div>
-<div class="card-block">
-<ul class="list-unstyled">
-<li class="list-icon text-sm">
-<svg class="icon icon-envelope" aria-hidden="true"><use xlink:href="#icon-envelope"></use></svg>
-<a href="/embedded-software/iot/security/contactme" rel="600||500" class="mgclightbox lb_iframe position-static"><b>Email Us</b></a>
-</li>
-<li class="list-icon text-sm mgc-chat-available hide">
-<svg class="icon icon-bubbles2" aria-hidden="true"><use xlink:href="#icon-bubbles2"></use></svg>
-<a href="/embedded-software/iot/security" class="mgc-chat-btn" rel="600||500 nofollow" data-context="%2Fembedded%2Dsoftware%2Fiot%2Fsecurity"><b>Chat Online</b></a>
-</li>
-<li class="list-icon text-sm mgc-chat-unavailable hide">
-<svg class="icon icon-bubbles2" aria-hidden="true"><use xlink:href="#icon-bubbles2"></use></svg>
-<b>Chat Online</b><br /><span class="text-xs">No agents are available</span>
-</li>
-<li class="list-icon text-sm">
-<svg class="icon icon-phone" aria-hidden="true"><use xlink:href="#icon-phone"></use></svg>
-<strong class="text-xs">1-800-547-3000</strong>
-<br><span class="text-xs">Direct: (503) 685-8000</span></li>
-</ul>
-</div>
-</div>
-</div>
-<div class="
-col-md-10
-col-xs-12 first-xs last-md content-main">
 <div class="card">
-<div class="card-header card-header-secondary  card-page-title">
+<div class="card-header card-header-secondary  card-page-title" style="background-color:orange!important" >
 
-<span style="color:white;font-size:20px;" id="title">Vulnerabilities</span>
+<span style="color:white;font-size:20px;" id="title">Triage Vulnerabilities</span>
 
 <select  id="select_group" style="margin-left:50px;float:none;">
 </select>
@@ -297,7 +220,7 @@ col-xs-12 first-xs last-md content-main">
 </div>
 </div>
 </div>
-</div>
+
 
 
 
@@ -381,7 +304,24 @@ col-xs-12 first-xs last-md content-main">
 			{title:"CVE", field:"cve", sorter:"string", width:130},
 			{title:"Description", field:"description", sorter:"string", width:500},
 			{title:"Package", field:"component", sorter:"string", width:100},
-			{title:"Status", field:"status.state", sorter:"string", width:100},
+			{title:"State", field:"status.state", editor:"select", width:150,editorParams:
+				{
+					"Investigate":"Investigate",
+					"Vulnerable":"Vulnerable",
+					"Won't Fix":"Won't Fix",
+					"Fixed":"Fixed",
+				},
+				cellEdited:function(cell)
+				{
+					UpdateStatus(cell);
+				},
+			},
+			{title:"Publish", field:"status.publish", width:100,editor:"tick",
+				cellEdited:function(cell)
+				{
+					UpdateStatus(cell);
+				}
+			},
 			{title:"Modified", field:"modified", sorter:"string", width:100}
 		];
 		return columns;
@@ -476,13 +416,76 @@ col-xs-12 first-xs last-md content-main">
 				}
 				return response; //return the tableData property of a response json object
 			},
+			cellClick:function(e, cell)
+			{
+				//e - the click event object
+				//cell - cell component
+				if((cell.getField() == 'status.state')||(cell.getField() == 'status.publish'))
+				{
+					// Do default click and list functions;
+				}
+				else
+				{
+					PopulateModal(cell.getRow().getData());
+					$('#modal').show();
+				}
+			},
 			rowClick:function(e, row)
 			{
 				//e - the click event object
 				//row - row component
-				PopulateModal(row.getData());
-				$('#modal').show();
+				//PopulateModal(row.getData());
+				//$('#modal').show();
 			},
+		});
+	}
+	function UpdateStatus(cell)
+	{
+		
+		selected_group = $('#select_group option:selected').val();
+		selected_product = $('#select_product option:selected').val();
+		selected_version = $('#select_version option:selected').val();
+
+		url = '/cve/'+selected_group+'/'+selected_product+'/'+selected_version;
+		
+		data = cell.getRow().getData();
+		d = {};
+		d.status = data.status;
+		d.group = selected_group;
+		d.product = selected_product;
+		d.version = selected_version;
+		
+		d._token = "{{ csrf_token() }}";
+		$.ajax({
+			type:"PUT",
+			url:'{{route("cve.status.update")}}',
+			cache: false,
+			data:d,
+			success: function(response){
+				cell.getRow().getElement().style.backgroundColor = "#8FBC8F";
+				function colorrevert()
+				{
+					element = cell.getRow().getElement();
+					if($(element).hasClass('tabulator-row-even'))
+						element.style.backgroundColor = "#EFEFEF";
+					else
+						element.style.backgroundColor = "#ffffff";
+				};
+				setTimeout(colorrevert, 2000);
+			},
+			error: function(response){
+				cell.restoreOldValue();
+				cell.getRow().getElement().style.backgroundColor = "#FFD700";
+				function colorrevert()
+				{
+					element = cell.getRow().getElement();
+					if($(element).hasClass('tabulator-row-even'))
+						element.style.backgroundColor = "#EFEFEF";
+					else
+						element.style.backgroundColor = "#ffffff";
+				};
+				setTimeout(colorrevert, 2000);
+			}
 		});
 	}
 	function PopulateModal(data)

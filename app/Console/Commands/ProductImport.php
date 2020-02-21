@@ -42,6 +42,6 @@ class ProductImport extends Command
     {
 		$products = new Products();
 		$products->Import();
-		$products->CacheUpdate();
+		//$products->CacheUpdate();
     }
 }

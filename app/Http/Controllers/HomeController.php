@@ -5,10 +5,13 @@ use \MongoDB\Client;
 use \MongoDB\BSON\UTCDateTime;
 
 use Auth;
-use App\User;
-
 use Illuminate\Http\Request;
+use Response;
 use App\Products;
+use App\CVEStatus;
+use App\CVE;
+use App\Cache;
+use App\Ldap;
 use Artisan;
 class HomeController extends Controller
 {
@@ -17,139 +20,119 @@ class HomeController extends Controller
      *
      * @return void
      */
-	private $cache_datafolder = "../data/cache";
     public function __construct()
     {
 		
     }
-	public function GetProducts()
+	
+	public function GetCVEs($group='all',$product='all',$version='all',$admin='all')
 	{
-		if(!file_exists($this->cache_datafolder."/products.json"))
-			Artisan::call('cache:update');
-		return  json_decode(file_get_contents($this->cache_datafolder."/products.json"));
-	}
-	public function GetProductCVEs($product_name,$version_name='all')
-	{
-		ob_start('ob_gzhandler');
-		if($version_name == 'all')
+		$p = new Products();
+		$group = $group=='all'?null:$group;
+		$product = $product=='all'?null:$product;
+		$version = $version=='all'?null:$version;
+		$admins = $admin=='all'?null:$admin;
+		$ids = $p->GetIds($group,$product,$version,$admin);
+		sort($ids);
+		$key = md5(implode(",",$ids));
+		$data = Cache::Load($key);
+		if($data==null)
 		{
-			if(!file_exists($this->cache_datafolder."/".$product_name."/cve.json"))
-			{
-				$products = $this->GetProducts();
-				$found = 0;
-				foreach($products as $product)
-				{
-					if(	$product_name == $product->name)
-					{
-						$found = 1;
-						break;
-					}
-				}
-				if($found)
-					Artisan::call('cache:update');
-				else
-					return [];
-			}
-			return file_get_contents($this->cache_datafolder."/".$product_name."/cve.json");
+			$c =  new CVE();
+			$data = $c->Get($ids);
+			Cache::Save($key,json_encode($data));
 		}
-		else
-		{
-			if(!file_exists($this->cache_datafolder."/".$product_name."/".$version_name."/cve.json"))
-			{
-				$products = $this->GetProducts();
-				$found = 0;
-				foreach($products as $product)
-				{
-					foreach($product->version as $version)
-					{
-						if(	$product_name == $product->name)
-						{
-							$found = 1;
-							break;
-						}
-					}
-				}
-				if($found)
-					Artisan::call('cache:update');
-				else
-					return [];
-			}
-			return file_get_contents($this->cache_datafolder."/".$product_name."/".$version_name."/cve.json");
-		}
+		return $data;
+
 	}
-	public function GetLatestCVEs()
+	public function CveStatusUpdate(Request $request)
 	{
-		ob_start('ob_gzhandler');
-		if(!file_exists($this->cache_datafolder."/allcve.json"))
-			Artisan::call('cache:update');
-			
-		return file_get_contents($this->cache_datafolder."/allcve.json");
-	}
-	public function TriageProduct($product_name)
-	{
-		$products = new Products();
-		$products = $products->Get();
-		$product = null;
-		foreach($products as $p)
-		{
-			if($p->name == $product_name)
-			{
-				$product = $p;
-			}
-		}
-		if($product == null)
-			abort(403, 'Product Not Found');
+		$data = $request->session()->get('data');
+		if($data == null)
+			return Response::json(['error' => 'Un Authorized access'], 404); 
+		if(!isset($data->user_name))
+			return Response::json(['error' => 'Un Authorized access'], 404); 
 		
+		$p = new Products();
+		$group = $request->group=='all'?null:$request->group;
+		$product = $request->product=='all'?null:$request->product;
+		$version = $request->version=='all'?null:$request->version;
+		$ids = $p->GetIds($group,$product,$version);
+		sort($ids);
+		$key = md5(implode(",",$ids));
 		
-		return view('triage.product',compact(['product']));
-	}
-	public function ProductCveStatusData($product_name)
-	{
-		//return view('triage_product',compact('product'));
-		$options = [
-			'sort' => ['nvd.lastModifiedDate' => -1],
-			'projection'=>
-					["_id"=>0,
-					"product.name"=>1,
-					"product.version"=>1,
-					"product.status"=>1,
-					"cve"=>1]
-		];
-		$donelist = [];
-		$query = ['product.name'=>$product_name];
+		$cvestatus = new CVEStatus();
+		$cvestatus->UpdateStatus($request->status);
 		
-		$dbname = config('database.connections.mongodb.database');
-		$mongoClient=new Client("mongodb://".config('database.connections.mongodb.host'));
-		$db = $mongoClient->$dbname;
-		
-		$cves = $db->cves->find($query,$options)->toArray();
-		$data = [];
-		
-		foreach($cves as $cve)
-		{
-			foreach($cve->product as $p)
-			{
-				if($p->name == $product_name)
-				{
-					$version = $p->version." ";
-					if(!array_key_exists($version,$data))
-					{
-						$data[$version] = new \StdClass();
-						$data[$version]->product = $product_name;
-						$data[$version]->version = $version;
-					}
-					$status = $p->status;
-					if(!isset($data[$version]->$status))
-						$data[$version]->$status=0;
-					$data[$version]->$status++;
-				}
-			}
-		}
-		return array_values($data);
+		Cache::Clean($key);
+		return ["status"=>"success"];
 	}
 	public function Index()
 	{
-		$products = $this->GetProducts();
-		return view('home',compact('products'));
+		$p = new Products();
+		$group_names = $p->GetGroupNames();
+		$product_names = [];
+		$version_names = [];
+		foreach($group_names as $group_name)
+		{
+			$productnames = $p->GetProductNames($group_name);
+			foreach($productnames as $productname)
+			{
+				$version_names[] = $p->GetVersionNames($group_name,$productname);
+			}
+			$product_names[] = $productnames;
+		}
+		return view('home',compact('group_names','product_names','version_names'));
+	}
+	public function Logout(Request $request)
+	{
+		$request->session()->forget('data');
+		echo "Your are logged out of system";
+	}
+	public function Login(Request $request)
+	{
+		return view('login');
+	}
+	public function Authenticate(Request $request)
+	{
+		//dump($request->data);
+		if(!isset($request->data['USER'])||!isset($request->data['PASSWORD']))
+			return Response::json(['error' => 'Invalid Credentials'], 404); 
+		$ldap =  new Ldap();
+		$data = $ldap->Login($request->data['USER'],$request->data['PASSWORD']);
+		if($data== null)
+		{
+			$request->session()->forget('data');
+			return Response::json(['error' => 'Invalid Credentials'], 404); 
+		}
+		else
+			$request->session()->put('data', $data);
+		return [];
+		//return $data->user_displayname;
+	}
+	public function Triage(Request $request)
+	{
+		
+		$data = $request->session()->get('data');
+		if($data == null)
+			return view('login');
+		if(!isset($data->user_name))
+			return view('login');
+		
+		$p = new Products($data->user_name);
+		$group_names = $p->GetGroupNames();
+		$product_names = [];
+		$version_names = [];
+		foreach($group_names as $group_name)
+		{
+			$productnames = $p->GetProductNames($group_name);
+			foreach($productnames as $productname)
+			{
+				$version_names[] = $p->GetVersionNames($group_name,$productname);
+			}
+			$product_names[] = $productnames;
+		}
+		$displayname=$data->user_displayname;
+		return view('triage',compact('displayname','group_names','product_names','version_names'));
 	}
 }

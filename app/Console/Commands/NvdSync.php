@@ -6,7 +6,7 @@ use Illuminate\Console\Command;
 use \MongoDB\Client;
 use \MongoDB\BSON\UTCDateTime;
 
-class NvdImport extends Command
+class NvdSync extends Command
 {
 	
 	private $urls = null;// Read from config
@@ -20,7 +20,7 @@ class NvdImport extends Command
      *
      * @var string
      */
-    protected $signature = 'nvd:import';
+    protected $signature = 'nvd:sync';
 
     /**
      * The console command description.
@@ -41,8 +41,8 @@ class NvdImport extends Command
 	
     public function Init()
     {
-		ini_set("memory_limit","3000M");
-		set_time_limit(0);
+		ini_set("memory_limit","2000M");
+		set_time_limit(3000);
 		
 		if(!file_exists($this->datafolder))
 			mkdir($this->datafolder, 0, true);
@@ -106,19 +106,6 @@ class NvdImport extends Command
 		}
 		else
 		   echo 'NVD Data already updated';
-	}
-	function Import()
-	{
-		$this->collection->Drop();
-		foreach($this->urls as $nvdurl)
-			$this->UpdateDatabase($nvdurl);
-				
-		echo "Updating Search Indexes\n"; 
-		//Create Text Index
-		$this->collection->createIndex(["configurations.nodes.cpe_match.cpe23Uri"=>'text',"configurations.nodes.children.cpe_match.cpe23Uri"=>'text']);
-		//Create Index
-		$this->collection->createIndex(["cve.CVE_data_meta.ID"=>1]);
-		echo 'Imported NVD Data successfully';
 	}
 	function GetContentSize($url) 
 	{
@@ -221,6 +208,6 @@ class NvdImport extends Command
     {
         //
 		$this->Init();
-		$this->Import();
+		$this->Update();
     }
 }

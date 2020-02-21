@@ -10,11 +10,13 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
+
 Route::get('/', 'HomeController@index'); 
+Route::get('/cve/{group?}/{product?}/{version?}/{admin?}', 'HomeController@GetCVEs')->name('cve.get');
 
-Route::get('/cve', 'HomeController@GetLatestCVEs')->name('cve.all');
-Route::get('/cve/{product_name}/{version_name?}', 'HomeController@GetProductCVEs')->name('cve.product'); 
+Route::get('/triage', 'HomeController@Triage')->name('triage'); 
+Route::get('/login', 'HomeController@Login')->name('login'); 
+Route::post('/authenticate', 'HomeController@Authenticate')->name('authenticate');  
+Route::get('/logout', 'HomeController@Logout')->name('logout'); 
+Route::put('/triage/cve/update', 'HomeController@CveStatusUpdate')->name('cve.status.update'); 
 
-
-Route::get('/triage/{product_name}', 'HomeController@TriageProduct')->name('triage.product.view'); 
-Route::get('/triage/data/{product_name}', 'HomeController@ProductCveStatusData')->name('triage.product.data'); 

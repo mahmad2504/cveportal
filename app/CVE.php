@@ -7,7 +7,8 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use \MongoDB\Client;
 use \MongoDB\BSON\UTCDateTime;
 use App;
-
+use App\CVEStatus;
+use App\Products;
 class CVE
 {
 	private $datafolder = "data/svm";
@@ -22,6 +23,7 @@ class CVE
 			$this->datafolder = "../".$this->datafolder;
 			$this->cache_datafolder = "../".$this->cache_datafolder;
 		}
+
 		if(!file_exists($this->datafolder))
 			mkdir($this->datafolder, 0, true);
 		if(!file_exists($this->cache_datafolder))
@@ -32,9 +34,79 @@ class CVE
 		$mongoClient=new Client("mongodb://".config('database.connections.mongodb.host'));
 		$this->db = $mongoClient->$dbname;
 	}
-	public function GetCVETriageStatus($cve,$product_id)
+	public function GetCVETriageStatus($cve,$productid)
 	{
-		return 'Vulnerable';
+		$cvestatus = new CVEStatus();
+		$status = $cvestatus->GetStatus($cve,$productid);
+		return $status;
+	}
+	private function ProcessCveRecord($record,$id=null)
+	{
+		$cve = new \StdClass();
+		$cve->cve = $record->cve;
+		if(!isset($record->nvd))
+			return null;
+		if($record->nvd==null)
+			return null;
+		
+		$cve->description = $record->nvd->description;
+		$cve->modified = $record->nvd->lastModifiedDate;
+		$cve->published = $record->nvd->publishedDate;
+		$cve->cvss = $record->nvd->cvss;
+		/*if(isset($record->nvd->cvssv3))
+			$cve->cvssv3 = $record->nvd->cvssv3;
+		
+		if(isset($record->nvd->cvssv2))
+			$cve->cvssv2 = $record->nvd->cvssv2;*/
+		
+		$cve->product = $record->product;
+		$remove = [];
+		$i=0;
+		$valid = 0;
+		$product_id = "-1";
+		$p = new Products();
+		if(count($id)==1)
+			$product_id = $id[0];
+		$cve->status = 'Not Applicable';
+		foreach($cve->product as $product)
+		{
+			$details = $p->GetProduct($product->id);
+			$product->group = $details->group;
+			$product->name = $details->name;
+			$product->version = $details->version;
+			$product->status = $this->GetCVETriageStatus($cve->cve,$product->id);
+			if($product_id == $product->id)
+				$cve->status = $product->status;
+		}
+		return $cve;
+	}
+	function Get($ids)
+	{		
+		$this->InitDb();
+		$options = [
+			'sort' => ['nvd.lastModifiedDate' => -1],
+			'projection'=>
+					["_id"=>0,
+					"nvd.description"=>1,
+					"nvd.lastModifiedDate"=>1,
+					"nvd.publishedDate"=>1,
+					"nvd.cvss"=>1,
+					"product.id"=>1,
+					"product.component.name"=>1,
+					"product.component.version"=>1,
+					"cve"=>1]
+		];
+		$query  = ['product.id'=>['$in'=>$ids]];
+		$cves = $this->db->cves->find($query,$options)->toArray();
+		
+		$cvedata = [];
+		foreach($cves as $record)
+		{
+			$r = $this->ProcessCveRecord($record,$ids);
+			if($r != null)
+				$cvedata[] = $r;
+		}
+		return $cvedata;
 	}
 	function BuildCVEs($product_id)
 	{
@@ -130,147 +202,22 @@ class CVE
 						$this->cves[$cve]->product[$product_id]->component[$component_id]->version = $component_version;
 					}
 				}
-				$status = $this->GetCVETriageStatus($cve,$product_id);
-				$this->cves[$cve]->product[$product_id]->status = $status;
+				//$status = $this->GetCVETriageStatus($cve,$product_id);
+				//$this->cves[$cve]->product[$product_id]->status = $status;
 			}
 		}
 	}
-	private function CreateCveRecord($record,$product_by_ids)
-	{
-		$cve = new \StdClass();
-		$cve->cve = $record->cve;
-		if(!isset($record->nvd))
-			return null;
-		if($record->nvd==null)
-			return null;
-		
-		$cve->description = $record->nvd->description;
-		$cve->modified = $record->nvd->lastModifiedDate;
-		$cve->published = $record->nvd->publishedDate;
-		$cve->cvss = $record->nvd->cvss;
-		/*if(isset($record->nvd->cvssv3))
-			$cve->cvssv3 = $record->nvd->cvssv3;
-		
-		if(isset($record->nvd->cvssv2))
-			$cve->cvssv2 = $record->nvd->cvssv2;*/
-		
-		$cve->product = $record->product;
-		foreach($cve->product as $product)
-		{
-			$details = $product_by_ids[$product->id];
-			$product->name = $details->name;
-			$product->version = $details->version;
-		}
-		return $cve;
-	}
-	public function CacheProductCves()
-	{
-		$this->InitDb();
-		$options = [
-			'sort' => ['nvd.lastModifiedDate' => -1],
-			'projection'=>
-					["_id"=>0,
-					"nvd.description"=>1,
-					"nvd.lastModifiedDate"=>1,
-					"nvd.publishedDate"=>1,
-					"nvd.cvss"=>1,
-					"nvd.cvssv3"=>1,
-					"nvd.cvssv2"=>1,
-					"product.id"=>1,
-					"product.status"=>1,
-					"product.component.name"=>1,
-					"product.component.version"=>1,
-					"cve"=>1]
-		];
-		$donelist = [];
-		$products = new Products();
-		$product_ids = $products->GetIds();
-		$product_by_ids = $products->GetByIds();
-		
-		/*foreach($this->products as $name,$product_array)
-		{
-			foreach($product_array as $id=>$product)
-			{
-				$ids = 
-			}
-		}
-		$query  = [ 'product.id'=>['in'= [  ] } }
-		$in: [ 5, ObjectId("507c35dd8fada716c89d0013")*/
-		
-		foreach($product_ids as $name=>$ids)
-		{
-			$ids = array_values($ids);
-			$query  = ['product.id'=>['$in'=>$ids]];
-			$cves = $this->db->cves->find($query,$options)->toArray();
-			$cvedata = [];
-			foreach($cves as $record)
-			{
-				$r = $this->CreateCveRecord($record,$product_by_ids);
-				if($r != null)
-					$cvedata[] = $r;
-			}
-			$folder_name = $this->cache_datafolder."/".$name;
-			if(!file_exists($folder_name))
-				mkdir($folder_name, 0, true);
-				
-			file_put_contents($folder_name."/cve.json",json_encode($cvedata));
-			
-			foreach($ids as $id)
-			{
-				$query = ['product.id'=>$id];
-				$cves = $this->db->cves->find($query,$options)->toArray();
-				$cvedata = [];
-				foreach($cves as $record)
-				{
-					$r = $this->CreateCveRecord($record,$product_by_ids);
-					if($r != null)
-						$cvedata[] = $r;
-				}
-				$p = $product_by_ids[$id];
-				$folder_name = $this->cache_datafolder."/".$name."/".$p->version;
-				if(!file_exists($folder_name))
-					mkdir($folder_name, 0, true);
-				file_put_contents($folder_name."/cve.json",json_encode($cvedata));
-			}
-		}
-		//dump($product_list);
-	}
-	public function CacheAllCves()
-	{
-		$this->InitDb();
-		$products = new Products();
-		$product_by_ids = $products->GetByIds();
-		
-		$options = [
-			//'limit' => 50,
-			'sort' => ['nvd.lastModifiedDate' => -1],
-		];
-		$cves = $this->db->cves->find([],$options)->toArray();
-		$cvedata = [];
-		foreach($cves as $record)
-		{
-			
-			$r = $this->CreateCveRecord($record,$product_by_ids);
-			if($r != null)
-				$cvedata[] = $r;
-		}
-		file_put_contents($this->cache_datafolder."/allcve.json",json_encode($cvedata));
-	}
-	public function CacheUpdate()
-	{
-		$this->CacheAllCves();
-		$this->CacheProductCves();
-	}
+
 	public function Import()
 	{
 		ini_set("memory_limit","2000M");
 		set_time_limit(0);
 		$this->InitDb();
 		$products = new Products();
-		$products = $products->Get();
-		foreach($products as $product)
+		$ids = $products->GetIds();
+		foreach($ids as $id)
 		{
-			$this->BuildCVEs($product->id);
+			$this->BuildCVEs($id);
 		}
 		foreach($this->cves as $cve)
 		{
@@ -280,7 +227,5 @@ class CVE
 		}
 		$this->db->cves->drop();
 		$this->db->cves->insertMany(array_values($this->cves));
-		$this->CacheUpdate();
-		
 	}
 }

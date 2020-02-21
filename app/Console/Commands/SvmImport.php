@@ -93,7 +93,7 @@ class SvmImport extends Command
     public function handle()
     {
         $products = new Products();
-		$products = $products->Get();
+		$products = $products->GetProducts();
 		$svm = new SVM();
 		
 		foreach($products as $product)
