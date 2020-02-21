@@ -10,11 +10,8 @@ class Ldap
 	}
 	function Login($user,$password)
 	{
-		//$bindDN = 'svc_esd@mgc.mentorg.com';
 		$ldap_conn = $this->ldap_conn;
 		$bindDN = $user.'@mgc.mentorg.com';
-		//$password = "lq38GfzT";
-		//$password = "E395120@gsmp3000";
 		//if connected, then bind
 		if ($ldap_conn)
 		{
