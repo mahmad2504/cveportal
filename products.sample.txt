@@ -1,0 +1,5 @@
+24A891CF, MEL Flex OS,  BSP ZCU102,  2.0,	himp
+24A891CD, MEL Flex OS,  BSP ZCU102,  2.1,	himp
+24A891CM, MEL Flex OS,  BSP IMX6  ,  1.0,	himp
+24A891CA, MEL Flex OS,  BSP IMX6  ,  1.1,	himp
+24A891CL, MEL Omni OS,  IPC	  ,  1.0,	himp|mahmad

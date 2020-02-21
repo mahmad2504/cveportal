@@ -105,46 +105,37 @@ class Products
 	{
 		ini_set("memory_limit","2000M");
 		set_time_limit(0);
-		
 		$this->InitDb();
-		$spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($this->datafolder.'/products.xlsm'); 
-		$data = $spreadsheet->getActiveSheet()->toArray(null,true,true,true); 
-
-		$i=0;
-		$products = [];
-		$database = [];
-		foreach($data as $row)
+		$handle = fopen($this->datafolder.'/products.txt', "r");
+		if ($handle) {
+			while (($line = fgets($handle)) !== false) {
+				// process the line read.
+				$line = str_replace("\t"," ",$line);
+				$line = str_replace("\r"," ",$line);
+				$line = str_replace("\n"," ",$line);
+				$fields = explode(",",$line);
+				if( count($fields) != 5)
 		{
-			
-			$i++;
-			if($i==1)
-				continue;
-			
-			$row = $data[$i];
-			
-			
-			$id = $row['A'];
-			$group = $row['B'];
-			$name = $row['C'];
-			$version = $row['D'];
-			$admins = explode(",",$row['E']);
-			
+					echo "Error parsing --->".$line;
+					exit();
+				}
 			$product=new \StdClass();
-			$product->id = $id;
-			$product->group = $group;
-			$product->name =  $name;
-			$product->version = "".$version;
-			$product->admin = $admins;
+				$product->id = trim($fields[0]);
+				$product->group = trim($fields[1]);
+				$product->name =  trim($fields[2]);
+				$product->version = "".trim($fields[3]);
+				$product->admin = explode("|",trim($fields[4]));
 			$database[] = $product;
+				
 		}
+			fclose($handle);
+		} 
+		else 
+		{
+			echo "Error in opening products.txt";
+			exit();
+		} 
 		$this->db->products->drop();
-		$data = [];
-		$data[] = $products;
 		$this->db->products->insertMany($database);
-		/*dump($this->GetProducts(null,null,'1.0'));
-		dump(implode(",",$this->GetIds(null,null,'1.0')));
-		dump($this->GetGroupNames());
-		dump($this->GetProductNames('MEL Omni OS'));
-		dump($this->GetVersionNames('MEL flex OS','BSP IMX6'));*/
 	}
 }
