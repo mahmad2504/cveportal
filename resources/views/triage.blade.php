@@ -288,12 +288,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 	var group_names = @json($group_names);
 	var product_names = @json($product_names);
 	var version_names = @json($version_names);
-	
+	var refresh={{$refresh}};
 	function Get3Columns()
 	{
 		columns = [
         {title:"CVE", field:"cve", sorter:"string", width:130},
 		{title:"Description", field:"description", sorter:"string", width:700},
+		{title:"Severity", field:"cvss.baseSeverity", sorter:"string", width:90},
 		{title:"Updated", field:"modified", sorter:"string", width:100}
 		];
 		return columns;
@@ -304,7 +305,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 			{title:"CVE", field:"cve", sorter:"string", width:130},
 			{title:"Description", field:"description", sorter:"string", width:500},
 			{title:"Package", field:"component", sorter:"string", width:100},
-			{title:"State", field:"status.state", editor:"select", width:150,editorParams:
+			{title:"State", field:"status.state", editor:"select", width:100,editorParams:
 				{
 					"Investigate":"Investigate",
 					"Vulnerable":"Vulnerable",
@@ -322,6 +323,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 					UpdateStatus(cell);
 				}
 			},
+			{title:"Severity", field:"cvss.baseSeverity", sorter:"string", width:90},
 			{title:"Modified", field:"modified", sorter:"string", width:100}
 		];
 		return columns;
@@ -375,7 +377,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 		selected_product = $('#select_product option:selected').val();
 		selected_version = $('#select_version option:selected').val();
 		
-		url = '/cve/'+selected_group+'/'+selected_product+'/'+selected_version;
+		url = '/cve/'+selected_group+'/'+selected_product+'/'+selected_version+'?refresh='+refresh;
 		if(selected_version == 'all')
 			columns = Get3Columns()
 		else
@@ -388,7 +390,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 		var table = new Tabulator("#vulnerability-table", {
 			columns:columns,
 			pagination:"local",
-			paginationSize:10,
+			paginationSize:50,
 			//autoColumns:true,
 			selectable:1,
 			ajaxURL:url,
@@ -584,7 +586,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 		selected_product = $('#select_product option:selected').val();
 		selected_version = $('#select_version option:selected').val();
 
-		url = '/cve/'+selected_group+'/'+selected_product+'/'+selected_version;
+		url = '/cve/'+selected_group+'/'+selected_product+'/'+selected_version+'?refresh='+refresh;
 		CreateTable(url,Get3Columns());
 	});
 </script>

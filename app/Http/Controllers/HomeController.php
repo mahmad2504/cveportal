@@ -24,8 +24,7 @@ class HomeController extends Controller
     {
 		
     }
-	
-	public function GetCVEs($group='all',$product='all',$version='all',$admin='all')
+	public function GetPublishedCVEs(Request $request,$group='all',$product='all',$version='all',$admin='all')
 	{
 		ob_start('ob_gzhandler');
 		$p = new Products();
@@ -36,7 +35,34 @@ class HomeController extends Controller
 		$ids = $p->GetIds($group,$product,$version,$admin);
 		sort($ids);
 		$key = md5(implode(",",$ids));
-		$data = Cache::Load($key);
+		$key = $key.'published';
+		$data = null;
+		if(($request->refresh==null)||($request->refresh==0))
+			$data = Cache::Load($key);
+		
+		if($data==null)
+		{
+			$c =  new CVE();
+			$data = $c->GetPublished($ids);
+			Cache::Save($key,json_encode($data));
+		}
+		return $data;
+	}
+	public function GetCVEs(Request $request,$group='all',$product='all',$version='all',$admin='all')
+	{
+		ob_start('ob_gzhandler');
+		$p = new Products();
+		$group = $group=='all'?null:$group;
+		$product = $product=='all'?null:$product;
+		$version = $version=='all'?null:$version;
+		$admins = $admin=='all'?null:$admin;
+		$ids = $p->GetIds($group,$product,$version,$admin);
+		sort($ids);
+		$key = md5(implode(",",$ids));
+		$data = null;
+		if(($request->refresh==null)||($request->refresh==0))
+			$data = Cache::Load($key);
+		
 		if($data==null)
 		{
 			$c =  new CVE();
@@ -66,9 +92,11 @@ class HomeController extends Controller
 		$cvestatus->UpdateStatus($request->status);
 		
 		Cache::Clean($key);
+		$key = $key.'published';
+		Cache::Clean($key);
 		return ["status"=>"success"];
 	}
-	public function Index()
+	public function Index(Request $request)
 	{
 		$p = new Products();
 		$group_names = $p->GetGroupNames();
@@ -83,7 +111,11 @@ class HomeController extends Controller
 			}
 			$product_names[] = $productnames;
 		}
-		return view('home',compact('group_names','product_names','version_names'));
+		if($request->refresh==null)
+			$refresh=0;
+		else
+			$refresh=1;
+		return view('home',compact('group_names','product_names','version_names','refresh'));
 	}
 	public function Logout(Request $request)
 	{
@@ -133,7 +165,11 @@ class HomeController extends Controller
 			}
 			$product_names[] = $productnames;
 		}
+		if($request->refresh==null)
+			$refresh=0;
+		else
+			$refresh=1;
 		$displayname=$data->user_displayname;
-		return view('triage',compact('displayname','group_names','product_names','version_names'));
+		return view('triage',compact('displayname','group_names','product_names','version_names','refresh'));
 	}
 }

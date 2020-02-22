@@ -84,6 +84,42 @@ class CVE
 		}
 		return $cve;
 	}
+	function GetPublished($ids)
+	{
+		$cves = $this->Get($ids);
+		$cve_delete_indexes = [];
+		$cve_index = 0;
+		foreach($cves as $cve)
+		{
+			$index = 0;
+			$delete_indexes = [];
+			$valid=0;
+			foreach($cve->product as $product)
+			{
+				
+				if(($product->status->publish == false)||($product->status->publish == 'false'))
+					$delete_indexes[]=$index;
+				else
+				{
+					if( in_array($product->id,$ids))
+						$valid=1;
+				}
+				$index++;
+			}
+			foreach($delete_indexes  as $index)
+			{
+				unset($cve->product[$index]);
+			}
+			if(($valid==0)||(count($cve->product)==0))
+				$cve_delete_indexes[] = $cve_index; 
+			$cve_index++;
+		}
+		
+		foreach($cve_delete_indexes as $cve_index)
+			unset($cves[$cve_index]);
+			
+		return array_values($cves);
+	}
 	function Get($ids)
 	{		
 		$this->InitDb();
@@ -118,34 +154,34 @@ class CVE
 		if($cvss['version'] == "2.0")
 		{
 			if($cvss["baseScore"] <= 3.9)
-				$severity = 'Low';
+				$severity = 'LOW';
 			
 			else if($cvss["baseScore"] <= 6.9)
-				$severity = 'Medium';
+				$severity = 'MEDIUM';
 			
 			else if($cvss["baseScore"] <= 10.0)
-				$severity =  'High';
+				$severity =  'HIGH';
 			else
-				$severity =  'Indterminate';
+				$severity =  'CRITICAL';
 		}
 		else
 		{
 			if($cvss["baseScore"] == 0)
-				$severity = 'None';
+				$severity = 'NONE';
 			else if($cvss["baseScore"] <= 3.9)
-				$severity = 'Low';
+				$severity = 'LOW';
 			
 			else if($cvss["baseScore"] <= 6.9)
-				$severity = 'Medium';
+				$severity = 'MEDIUM';
 			
 			else if($cvss["baseScore"] <= 8.9)
-				$severity =  'High';
+				$severity =  'HIGH';
 			
 			else if($cvss["baseScore"] <= 10.0)
-				$severity =  'Critical';
+				$severity =  'CRITICAL';
 			
 			else
-				$severity =  'Indterminate';
+				$severity =  'CRITICAL';
 			
 		}
 		//echo $severity."\r\n";

@@ -13,6 +13,8 @@
 
 Route::get('/', 'HomeController@index'); 
 Route::get('/cve/{group?}/{product?}/{version?}/{admin?}', 'HomeController@GetCVEs')->name('cve.get');
+Route::get('/cve_published/{group?}/{product?}/{version?}/{admin?}', 'HomeController@GetPublishedCVEs')->name('cve.get.published');
+
 
 Route::get('/triage', 'HomeController@Triage')->name('triage'); 
 Route::get('/login', 'HomeController@Login')->name('login'); 

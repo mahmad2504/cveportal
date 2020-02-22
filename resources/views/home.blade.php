@@ -67,7 +67,7 @@
   text-decoration: none;
   cursor: pointer;
 }
-table {width:40%;text-align:center } /* Make table wider */  
+table {width:50%;text-align:center } /* Make table wider */  
 td, th { border: 1px solid #CCC; text-align:left} /* Add borders to cells */  
 tr { font-size:12px } /* Add borders to cells */
 </style>
@@ -139,7 +139,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 </div>
 <nav class="header-main-navigation navbar-primary" id="primary">
 <ul>
-<li class="products" id="navbar-products">
 <a href="https://mentor.com/products/" title="Products">
 <i class="menu-icon menu-icon-animated position-relative m-r-sm" style="top: -3px;"><span></span></i>
 Products & Solutions
@@ -152,11 +151,8 @@ Products & Solutions
 </ul>
 </nav>
 </header>
-<div class="primary-dropdown bg-gray-lightest" id="nav-products">
-<div class="container p-t-lg p-b">
 
-</div>
-</div>
+
 <header id="header-secondary" class="bg-secondary-darker p-y" role="banner">
 <div class="container">
 <div class="row row-flex middle-lg">
@@ -165,18 +161,7 @@ Products & Solutions
 <a href="#" title="Security Vulnerabilities">Security Vulnerability Database</a>
 </div>
 </div>
-<div class="col-md-3 col-xs-12">
-<div id="search">
-<form id="searchbox" action="https://www.mentor.com/embedded-software/search/">
-<div class="search-box input-group">
-<input type="text" id="searchTerm" class="form-control bg-transparent text-inverse p-x-0" autocomplete="off" name="query" data-dauuid="3b3d43ac-bb64-4e78-94c5-f0f27d550ce0" placeholder="Search Mentor.com" value="" rel="Search Mentor.com" />
-<span class="input-group-btn">
-<button type="submit" class="searchbutton btn bg-transparent text-inverse p-x-0"><svg class="icon icon-search2" aria-hidden="true"><use xlink:href="#icon-search2"></use></svg></button>
-</span>
-</div>
-</form>
-</div>
-</div>
+
 </div>
 </div>
 </header>
@@ -217,35 +202,19 @@ Products & Solutions
 <div  id="copy" class="container">
 <br>
 
-<div class="row row-flex content-container">
-<div id="sidebar" class="col-md-2 col-xs-12 last-xs first-md content-sidebar">
-<h2 class="hidden-lg-up header-group"><span><a href="#" title="Security Vulnerabilities">Security Vulnerabilities</a></span></h2>
-<div class=" ">
-
-
-
-
-</div>
-
-<div class="card callout callout-callout">
-<div class="card-header">
-<h2 class="text-uc text-gray-dark m-b-0">Products</h2>
-</div>
+<div class="row row-flex" style="width:110%;!important">
+	<div id="sidebar" class="col-md-2 col-xs-12 last-xs first-md content-sidebar">
+	<h2 class="hidden-lg-up header-group"><span><a href="#" title="Security Vulnerabilities">Security Vulnerabilities</a></span></h2>
+	<div class="card callout callout-callout">		
+	<div class="card-header">
+		<h2 class="text-uc text-gray-dark m-b-0">Products</h2>
+	</div>
 @for ($i = 0; $i < count($group_names); $i++)
-	<li class="list-group-item list-group-item-nav p-a-0">
-	<a class="productbutton" data-index="{{$i}}"  title="{{$group_names[$i]}}">{{$group_names[$i]}}</a>
-	</li>
+		<li class="list-group-item list-group-item-nav p-a-0">
+			<a class="productbutton" data-index="{{$i}}"  title="{{$group_names[$i]}}">{{$group_names[$i]}}</a>
+		</li>
 @endfor
 
-
-<!-- <li class="list-group-item list-group-item-nav p-a-0">
-<a href="/embedded-software/linux/" title="Mentor Embedded Linux Flex OS">Mentor Embedded Linux Flex OS</a>
-</li>
-<li class="list-group-item list-group-item-nav p-a-0">
-<a href="/embedded-software/linux/" title="Mentor Embedded Linux Omni OS">Mentor Embedded Linux Omni OS</a>
-</li>
-<li class="list-group-item list-group-item-nav p-a-0">
-<a href="/embedded-software/linux/" title="Mentor Embedded Linux Omni OS">Nucleus</a> -->
 </li>
 </div>
 <div class="card callout callout-callout">
@@ -365,12 +334,13 @@ col-xs-12 first-xs last-md content-main">
 	var group_names = @json($group_names);
 	var product_names = @json($product_names);
 	var version_names = @json($version_names);
-	
+	var refresh={{$refresh}};
 	function Get3Columns()
 	{
 		columns = [
         {title:"CVE", field:"cve", sorter:"string", width:130},
-		{title:"Description", field:"description", sorter:"string", width:700},
+		{title:"Description", field:"description", sorter:"string", width:690},
+		{title:"Severity", field:"cvss.baseSeverity", sorter:"string", width:90},
 		{title:"Updated", field:"modified", sorter:"string", width:100}
 		];
 		return columns;
@@ -380,8 +350,9 @@ col-xs-12 first-xs last-md content-main">
 		columns = [
 			{title:"CVE", field:"cve", sorter:"string", width:130},
 			{title:"Description", field:"description", sorter:"string", width:500},
-			{title:"Package", field:"component", sorter:"string", width:100},
+			{title:"Package", field:"component", sorter:"string", width:90},
 			{title:"Status", field:"status.state", sorter:"string", width:100},
+			{title:"Severity", field:"cvss.baseSeverity", sorter:"string", width:90},
 			{title:"Modified", field:"modified", sorter:"string", width:100}
 		];
 		return columns;
@@ -435,7 +406,7 @@ col-xs-12 first-xs last-md content-main">
 		selected_product = $('#select_product option:selected').val();
 		selected_version = $('#select_version option:selected').val();
 		
-		url = '/cve/'+selected_group+'/'+selected_product+'/'+selected_version;
+		url = '/cve_published/'+selected_group+'/'+selected_product+'/'+selected_version+'?refresh='+refresh;
 		if(selected_version == 'all')
 			columns = Get3Columns()
 		else
@@ -524,6 +495,7 @@ col-xs-12 first-xs last-md content-main">
 		html+='<th>Version</th>';
 		html+='<th>Package</th>';
 		html+='<th>Status</th>';
+		html+='<th>Published</th>';
 		html+='</tr>';
 		
 		for(i=0;i<data.product.length;i++)
@@ -539,6 +511,10 @@ col-xs-12 first-xs last-md content-main">
 			}
 			html += '</td>';
 			html += '<td>'+product.status.state+'</td>';
+			if(product.status.publish)
+				html += '<td>Yes</td>';
+			else
+				html += '<td>No</td>';
 			html +='</tr>';
 		}
 		html +='</table>';
@@ -564,7 +540,7 @@ col-xs-12 first-xs last-md content-main">
 		selected_product = $('#select_product option:selected').val();
 		selected_version = $('#select_version option:selected').val();
 
-		url = '/cve/'+selected_group+'/'+selected_product+'/'+selected_version;
+		url = '/cve_published/'+selected_group+'/'+selected_product+'/'+selected_version+'?refresh='+refresh;
 		CreateTable(url,Get3Columns());
 	});
 </script>

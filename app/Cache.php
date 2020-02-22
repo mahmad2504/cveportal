@@ -35,18 +35,19 @@ class Cache
 	public static function Clean($key=null)
 	{
 		$folder = self::GetCacheFolder();
-		if($key != null)
+		/*if($key != null)
 		{
 			$filename = $folder."/".$key;
+			echo $filename."\r\n";
 			if(file_exists($filename))
 				unlink($filename);
 		}
 		else
-		{
-			foreach(glob(self::$cache_datafolder.'/*') as $v)
+		{*/
+			foreach(glob($folder.'/*') as $v)
 			{
 				unlink($v);
 			}
-		}
+		//}
 	}
 }
