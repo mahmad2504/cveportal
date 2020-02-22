@@ -192,7 +192,7 @@ $(document).ready(function()
 			e.preventDefault();
 			formdata = {};
 			formdata.data = {};
-			ShowLoading();
+			
 			//formdata.data = $('#loginform').serializeArray();
 			$("#loginform").serializeArray().map(function(x)
 			{
@@ -203,9 +203,10 @@ $(document).ready(function()
 				}
 				formdata.data[x.name] = x.value;
 			}); 
+			
 			if(formdata.data == null)
 				return;
-			
+			ShowLoading();
 			formdata._token = "{{ csrf_token() }}";
 			console.log(formdata);
 			$.ajax({
@@ -219,6 +220,7 @@ $(document).ready(function()
 				},
 				error: function(response)
 				{
+					HideLoading();
 					alert("Invalid user or password");
 				}
 			});			

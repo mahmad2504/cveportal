@@ -27,6 +27,7 @@ class HomeController extends Controller
 	
 	public function GetCVEs($group='all',$product='all',$version='all',$admin='all')
 	{
+		ob_start('ob_gzhandler');
 		$p = new Products();
 		$group = $group=='all'?null:$group;
 		$product = $product=='all'?null:$product;

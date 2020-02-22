@@ -51,6 +51,9 @@ class CVE
 		$cve->description = $record->nvd->description;
 		$cve->modified = $record->nvd->lastModifiedDate;
 		$cve->published = $record->nvd->publishedDate;
+		if($record->nvd->cvss == null)
+			return null;
+		
 		$cve->cvss = $record->nvd->cvss;
 		/*if(isset($record->nvd->cvssv3))
 			$cve->cvssv3 = $record->nvd->cvssv3;
@@ -108,6 +111,45 @@ class CVE
 				$cvedata[] = $r;
 		}
 		return $cvedata;
+	}
+	function ComputeSeverity($cvss)
+	{
+		//echo $cvss["baseScore"]."\r\n";
+		if($cvss['version'] == "2.0")
+		{
+			if($cvss["baseScore"] <= 3.9)
+				$severity = 'Low';
+			
+			else if($cvss["baseScore"] <= 6.9)
+				$severity = 'Medium';
+			
+			else if($cvss["baseScore"] <= 10.0)
+				$severity =  'High';
+			else
+				$severity =  'Indterminate';
+		}
+		else
+		{
+			if($cvss["baseScore"] == 0)
+				$severity = 'None';
+			else if($cvss["baseScore"] <= 3.9)
+				$severity = 'Low';
+			
+			else if($cvss["baseScore"] <= 6.9)
+				$severity = 'Medium';
+			
+			else if($cvss["baseScore"] <= 8.9)
+				$severity =  'High';
+			
+			else if($cvss["baseScore"] <= 10.0)
+				$severity =  'Critical';
+			
+			else
+				$severity =  'Indterminate';
+			
+		}
+		//echo $severity."\r\n";
+		return $severity;
 	}
 	function BuildCVEs($product_id)
 	{
@@ -173,7 +215,13 @@ class CVE
 							$this->cves[$cve]->nvd->cvss  =  iterator_to_array($cve_nvd_data['impact']['baseMetricV2']['cvssV2']);
 							//$this->cves[$cve]->nvd->cvssv2 = iterator_to_array($cve_nvd_data['impact']['baseMetricV2']['cvssV2']);
 						}
-						
+						if($this->cves[$cve]->nvd->cvss != null)
+						{
+							if(!isset($this->cves[$cve]->nvd->cvss['baseSeverity']))
+							{
+								$this->cves[$cve]->nvd->cvss['baseSeverity'] = $this->ComputeSeverity($this->cves[$cve]->nvd->cvss);
+							}
+						}
 						//echo $cve_nvd_data['cve']['CVE_data_meta']['ID'];
 						//dump($this->cves[$cve]->nvd);
 					}

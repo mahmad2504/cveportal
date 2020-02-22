@@ -67,7 +67,7 @@
   text-decoration: none;
   cursor: pointer;
 }
-table {width:40%;text-align:center } /* Make table wider */  
+table {width:50%;text-align:center } /* Make table wider */  
 td, th { border: 1px solid #CCC; text-align:left} /* Add borders to cells */  
 tr { font-size:12px } /* Add borders to cells */
 </style>
@@ -539,6 +539,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 		html+='<th>Version</th>';
 		html+='<th>Package</th>';
 		html+='<th>Status</th>';
+		html+='<th>Published</th>';
 		html+='</tr>';
 		
 		for(i=0;i<data.product.length;i++)
@@ -554,6 +555,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 			}
 			html += '</td>';
 			html += '<td>'+product.status.state+'</td>';
+			if(product.status.publish)
+				html += '<td>Yes</td>';
+			else
+				html += '<td>No</td>';
 			html +='</tr>';
 		}
 		html +='</table>';

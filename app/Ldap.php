@@ -8,8 +8,20 @@ class Ldap
 		//attempt to connect
 		$this->ldap_conn=ldap_connect($ldaphost);  // must be a valid LDAP server!
 	}
+	function FakeLogin($user,$password)
+	{
+		$data = new \StdClass();
+		$data->user_name = $user;
+        $data->user_displayname = $user;
+        $data->user_email = $user.'@fake.com';
+		$data->user_firstname = $user;
+        $data->user_lastname = $user;
+		return $data;
+	}   
 	function Login($user,$password)
 	{
+		return $this->FakeLogin($user,$password);
+		
 		$ldap_conn = $this->ldap_conn;
 		$bindDN = $user.'@mgc.mentorg.com';
 		//if connected, then bind
