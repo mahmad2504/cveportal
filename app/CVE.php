@@ -23,7 +23,6 @@ class CVE
 			$this->datafolder = "../".$this->datafolder;
 			$this->cache_datafolder = "../".$this->cache_datafolder;
 		}
-
 		if(!file_exists($this->datafolder))
 			mkdir($this->datafolder, 0, true);
 		if(!file_exists($this->cache_datafolder))
@@ -76,7 +75,9 @@ class CVE
 			$product->version = $details->version;
 			$product->status = $this->GetCVETriageStatus($cve->cve,$product->id);
 			if($product_id == $product->id)
+			{
 				$cve->status = $product->status;
+			}
 		}
 		return $cve;
 	}

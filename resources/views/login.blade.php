@@ -8,6 +8,8 @@
 <meta HTTP-EQUIV="cache-control" CONTENT="no-cache, no-store, must-revalidate">
 <meta HTTP-EQUIV="Expires" CONTENT="Mon, 01 Jan 1970 23:59:59 GMT">
 <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<link href="{{ asset('css/loading.css') }}" rel="stylesheet">
+
 <style>
 	* {
 		box-sizing: border-box;
@@ -151,7 +153,7 @@
 <div class="login-title">
   <h2>Login</h2>
 </div>
-<div id="login-error-msg">Invalid username or password<br></div>
+<div style="display:none;" class="loading">Loading&#8230;</div>
 <form  action="#" id="loginform" method="#">
 	<label for="username">User name</label>
 	<input type="text" name="USER" id="username" placeholder="User name" autocomplete="on" autofocus >
@@ -172,55 +174,14 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 <script>
 
-/*
-function UpdateStatus(cell)
+function ShowLoading()
 {
-	selected_group = $('#select_group option:selected').val();
-	selected_product = $('#select_product option:selected').val();
-	selected_version = $('#select_version option:selected').val();
-
-	url = '/cve/'+selected_group+'/'+selected_product+'/'+selected_version;
-	
-	data = cell.getRow().getData();
-	d = {};
-	d.status = data.status;
-	d.group = selected_group;
-	d.product = selected_product;
-	d.version = selected_version;
-	
-	d._token = "{{ csrf_token() }}";
-	$.ajax({
-		type:"PUT",
-		url:'{{route("cve.status.update")}}',
-		cache: false,
-		data:d,
-		success: function(response){
-			cell.getRow().getElement().style.backgroundColor = "#8FBC8F";
-			function colorrevert()
-			{
-				element = cell.getRow().getElement();
-				if($(element).hasClass('tabulator-row-even'))
-					element.style.backgroundColor = "#EFEFEF";
-				else
-					element.style.backgroundColor = "#ffffff";
-			};
-			setTimeout(colorrevert, 2000);
-		},
-		error: function(response){
-			cell.restoreOldValue();
-			cell.getRow().getElement().style.backgroundColor = "#FFD700";
-			function colorrevert()
-			{
-				element = cell.getRow().getElement();
-				if($(element).hasClass('tabulator-row-even'))
-					element.style.backgroundColor = "#EFEFEF";
-				else
-					element.style.backgroundColor = "#ffffff";
-			};
-			setTimeout(colorrevert, 2000);
-		}
-	});
-}*/
+	$('.loading').show();	
+}
+function HideLoading()
+{
+	$('.loading').hide();	
+}
 
 $(document).ready(function()
 {
@@ -231,7 +192,7 @@ $(document).ready(function()
 			e.preventDefault();
 			formdata = {};
 			formdata.data = {};
-	
+			ShowLoading();
 			//formdata.data = $('#loginform').serializeArray();
 			$("#loginform").serializeArray().map(function(x)
 			{

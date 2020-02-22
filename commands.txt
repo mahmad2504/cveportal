@@ -1,0 +1,8 @@
+php artisan nvd:sync
+php artisan nvd:import
+
+php artisan svm:sync
+php artisan svm:import
+
+php artisan product:import
+php cve:import

@@ -463,6 +463,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 			data:d,
 			success: function(response){
 				cell.getRow().getElement().style.backgroundColor = "#8FBC8F";
+				//console.log(cell.getRow().getData());
+				d = cell.getRow().getData();
+				
+				for(i=0;i<d.product.length;i++)
+				{
+					if(d.product[i].id == d.status.productid)
+					{
+						d.product[i].status.state = d.status.state;
+						d.product[i].status.publish = d.status.publish;
+						//console.log(d.product[i].status);
+					}
+				}
 				function colorrevert()
 				{
 					element = cell.getRow().getElement();
