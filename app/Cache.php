@@ -46,7 +46,7 @@ class Cache
 		{*/
 			foreach(glob($folder.'/*') as $v)
 			{
-				unlink($v);
+			   @unlink($v);
 			}
 		//}
 	}

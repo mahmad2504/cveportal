@@ -98,6 +98,7 @@ class HomeController extends Controller
 	}
 	public function Index(Request $request)
 	{
+		//phpinfo(INFO_MODULES);
 		$p = new Products();
 		$group_names = $p->GetGroupNames();
 		$product_names = [];
