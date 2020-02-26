@@ -67,6 +67,9 @@
   text-decoration: none;
   cursor: pointer;
 }
+.editable{
+	font-weight:bold;
+}
 table {width:50%;text-align:center } /* Make table wider */  
 td, th { border: 1px solid #CCC; text-align:left} /* Add borders to cells */  
 tr { font-size:12px } /* Add borders to cells */
@@ -316,12 +319,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 				{
 					UpdateStatus(cell);
 				},
+				cssClass:'editable'
 			},
 			{title:"Publish", field:"status.publish", width:100,editor:"tick",
 				cellEdited:function(cell)
 				{
 					UpdateStatus(cell);
-				}
+				},
+				cssClass:'editable'
 			},
 			{title:"Severity", field:"cvss.baseSeverity", sorter:"string", width:90},
 			{title:"Modified", field:"modified", sorter:"string", width:100}
@@ -575,8 +580,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 	$(document).ready(function()
 	{
 		console.log("Vulnerability Page Loaded");
-		AddOption('select_group','All Groups','all',0);
-		AddOption('select_product','All Products','all',0);
+		AddOption('select_group','All Products','all',0);
+		AddOption('select_product','All Parts','all',0);
 		AddOption('select_version','All Versions','all',0);
 		for(i=0;i<group_names.length;i++)
 		{

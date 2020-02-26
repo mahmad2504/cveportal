@@ -20,7 +20,7 @@ class Ldap
 	}   
 	function Login($user,$password)
 	{
-		return $this->FakeLogin($user,$password);
+		//return $this->FakeLogin($user,$password);
 		
 		$ldap_conn = $this->ldap_conn;
 		$bindDN = $user.'@mgc.mentorg.com';

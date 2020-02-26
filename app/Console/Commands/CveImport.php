@@ -11,7 +11,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 use App\svm;
 use App\Products;
-use App\Cve;
+use App\CVE;
 use App\Cache;
 use App;
 use Artisan;
