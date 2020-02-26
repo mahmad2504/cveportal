@@ -9,9 +9,9 @@ use \MongoDB\BSON\UTCDateTime;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
-use App\svm;
+use App\SVM;
 use App\Products;
-use App\Cve;
+use App\CVE;
 use App;
 use Artisan;
 class CacheUpdate extends Command

@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\svm;
+use App\SVM;
 use App\Products;
 
 class SvmSync extends Command

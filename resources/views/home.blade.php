@@ -529,8 +529,8 @@ col-xs-12 first-xs last-md content-main">
 	$(document).ready(function()
 	{
 		console.log("Vulnerability Page Loaded");
-		AddOption('select_group','All Groups','all',0);
-		AddOption('select_product','All Products','all',0);
+		AddOption('select_group','All Products','all',0);
+		AddOption('select_product','All Parts','all',0);
 		AddOption('select_version','All Versions','all',0);
 		for(i=0;i<group_names.length;i++)
 		{
