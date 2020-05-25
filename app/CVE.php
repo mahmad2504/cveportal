@@ -137,6 +137,7 @@ class CVE
 					"cve"=>1]
 		];
 		$query  = ['product.id'=>['$in'=>$ids]];
+		
 		$cves = $this->db->cves->find($query,$options)->toArray();
 		
 		$cvedata = [];
@@ -197,10 +198,14 @@ class CVE
 			"id"=>1,
 			"cve"=>1]
 		];
-		$collectionname = $product_id;
-		$cursor = $this->db->$collectionname->find([],$projection);	
-		
-		foreach($cursor as $component)
+		$query = ['id'=>$product_id];
+		$mlist = $this->db->monitoring_lists->findOne($query);	
+		if($mlist == null)
+		{
+			dd($product_id." is empty");
+		}
+		$cpes = $this->db->cpe->find(['id'=>['$in' => $mlist->components]]);
+		foreach($cpes as $component)
 		{
 			foreach($component->cve as $cve)
 			{

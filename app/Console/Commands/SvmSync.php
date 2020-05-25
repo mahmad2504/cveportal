@@ -41,7 +41,7 @@ class SvmSync extends Command
     {
 		$products = new Products();
 		$products->Import();
-		$products = $products->Get();
+		$products = $products->GetProducts();
 		$svm = new SVM();
 		set_time_limit(0);
 		foreach($products as $product)

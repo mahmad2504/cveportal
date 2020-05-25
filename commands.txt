@@ -6,3 +6,10 @@ php artisan svm:import
 
 php artisan product:import
 php cve:import
+
+
+
+285D2819, Mentor Embedded Linux AMD, , Elm_Async3,hmsadiq
+0E041421, Mentor Industrial Linux, OC2 edition, 1.4,hmsadiq|himp 
+3C4D1337, Mentor Industrial Linux, OC2 edition, 1.5,hmsadiq|himp
+24A891CF, Mentor Industrial Linux, MFP        , 1.5,hmsadiq|himp

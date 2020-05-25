@@ -4,9 +4,8 @@ class Ldap
 {
 	function __construct()
 	{
-		$ldaphost = "134.86.102.150";  // your ldap servers
+		$this->ldaphost = "134.86.102.150";  // your ldap servers
 		//attempt to connect
-		$this->ldap_conn=ldap_connect($ldaphost);  // must be a valid LDAP server!
 	}
 	function FakeLogin($user,$password)
 	{
@@ -20,8 +19,9 @@ class Ldap
 	}   
 	function Login($user,$password)
 	{
-		//return $this->FakeLogin($user,$password);
+		return $this->FakeLogin($user,$password);
 		
+		$this->ldap_conn=ldap_connect($this->ldaphost);  // must be a valid LDAP server!
 		$ldap_conn = $this->ldap_conn;
 		$bindDN = $user.'@mgc.mentorg.com';
 		//if connected, then bind

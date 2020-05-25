@@ -72,7 +72,6 @@ class SVM
 			$found = 0;
 			foreach($notification->assigned_components as $componentid)
 			{
-				
 				if(array_key_exists($componentid,$components))
 				{
 					$component = $components[$componentid];
@@ -82,11 +81,9 @@ class SVM
 						if($cnotification->id == $notification->id)
 							$cnotification->data = $notification;
 					}
-					
 					//dump($componentid);
 					$found=1;
 				}
-				
 			}
 			if($found==0)
 			{
@@ -108,7 +105,7 @@ class SVM
 			}
 			$component->cve = array_values($component->cve);
 		}
-		$folder = $this->datafolder.$monitorin_list_id;
+		$folder = $this->datafolder."/".$monitorin_list_id;
 		if (!file_exists($folder))
 		{
 			mkdir($folder, 0777, true);
@@ -135,7 +132,7 @@ class SVM
 	
 	function GetAllNotifications($monitoring_list_id)
 	{
-		$folder = $this->datafolder.$monitoring_list_id;
+		$folder = $this->datafolder."/".$monitoring_list_id;
 		
 		if (!file_exists($folder))
 		{
@@ -189,7 +186,7 @@ class SVM
 	
 	function GetComponents($monitoring_list_id)
 	{
-		$folder = $this->datafolder.$monitoring_list_id;
+		$folder = $this->datafolder."/".$monitoring_list_id;
 		
 		if (!file_exists($folder))
 		{

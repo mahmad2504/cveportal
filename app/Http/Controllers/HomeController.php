@@ -62,7 +62,6 @@ class HomeController extends Controller
 		$data = null;
 		if(($request->refresh==null)||($request->refresh==0))
 			$data = Cache::Load($key);
-		
 		if($data==null)
 		{
 			$c =  new CVE();
@@ -146,7 +145,6 @@ class HomeController extends Controller
 	}
 	public function Triage(Request $request)
 	{
-		
 		$data = $request->session()->get('data');
 		if($data == null)
 			return view('login');

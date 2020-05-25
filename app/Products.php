@@ -11,7 +11,7 @@ use App;
 
 class Products
 {
-	private $datafolder = "data/svm";
+	private $datafolder = "data";
 	private $db = null;
 	private $admin=null;
 	function __construct($admin=null)
