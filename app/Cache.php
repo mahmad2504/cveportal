@@ -16,6 +16,24 @@ class Cache
 			mkdir($folder, 0, true);
 		return $folder;
 	}
+	public static function SaveStaticProductData($data)
+	{
+		$folder = self::GetCacheFolder();
+		$filename=$folder."/products.json";
+		file_put_contents($filename,"var groups=".$data);
+	}
+	public static function SaveStaticPage($key,$data)
+	{
+		$folder = self::GetCacheFolder();
+		$filename=$folder."/".$key.".html";
+		$html = file_get_contents($folder."/index.template");
+		
+		$html = str_replace('PRODUCT_SPECIFIC_CODE','var data='.$data.";",$html);
+		//dump($html);
+		//$html = str_replace("\r\n",'',$html);
+		//$html = str_replace("\t",'',$html);
+		file_put_contents($filename,$html);
+	}
 	public static function Save($key,$data)
 	{
 		$folder = self::GetCacheFolder();

@@ -26,6 +26,7 @@ class HomeController extends Controller
     }
 	public function GetPublishedCVEs(Request $request,$group='all',$product='all',$version='all',$admin='all')
 	{
+		$static_file_name = $group."_".$product."_".$version;
 		ob_start('ob_gzhandler');
 		$p = new Products();
 		$group = $group=='all'?null:$group;
@@ -45,6 +46,7 @@ class HomeController extends Controller
 			$c =  new CVE();
 			$data = $c->GetPublished($ids);
 			Cache::Save($key,json_encode($data));
+			Cache::SaveStaticPage($static_file_name,json_encode($data));
 		}
 		return $data;
 	}

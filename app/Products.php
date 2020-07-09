@@ -88,7 +88,7 @@ class Products
 		if($productname!=null)
 			$query['name'] = new Regex(preg_quote($productname), 'i');
 		if($versionname!=null)
-			$query['version'] = new Regex(preg_quote("".$versionname), 'i');	
+			$query['version'] = $versionname;//new Regex(preg_quote("".$versionname), 'i');	
 		if($this->admin!=null)
 			$query['admin'] = new Regex(preg_quote("".$this->admin), 'i');
 		
