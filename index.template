@@ -1,0 +1,319 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>The HTML5 Herald</title>
+  <meta name="description" content="The HTML5 Herald">
+  <meta name="author" content="SitePoint">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabulator/4.7.0/css/tabulator.min.css" />
+  
+
+<style>
+
+.flex-container {
+  display: flex;
+  background-color: DodgerBlue;
+  width:95%;
+  margin: 0 auto;
+  flex-direction: column;
+}
+.flex-container > div {
+  
+}
+
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+}
+
+/* The Close Button */
+.close {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+table {width:50%;text-align:center } /* Make table wider */  
+td, th { border: 1px solid #CCC; text-align:left} /* Add borders to cells */  
+tr { font-size:12px } /* Add borders to cells */
+
+
+</style>
+</style>
+</head>
+</style>
+</head>
+
+<body>
+
+<!-- **************************************************************************** -->
+<!-- The Modal -->
+<div id="modal" class="modal">
+  <!-- Modal content -->
+  <div class="modal-content" style="width:60%;margin: auto;">
+    <span id="closemodal" class="close">&times;</span>
+    <h3 id="cve_title"></h3>
+	<h4>Description</h4>
+	<p id="cve_description"></p>
+	<div  class="card card-block" style="margin-bottom:0px;">
+		<div>
+			<small style="float:left;margin-top:-10px;"><span style="font-weight:bold;">Vector: </span><span id="cvss_vector"></span></small>
+			<small style="float:right;margin-top:-10px;"><span style="font-weight:bold;">Attack Vector: </span><small id="cvss_attackvector"></small></small>
+		</div>
+		<br>
+		<div>
+			<small style="float:left;margin-top:-10px;"><span style="font-weight:bold;">Score: </span><span id="cvss_basescore"></span></small>
+			<small style="float:right;margin-top:-10px;"><span style="font-weight:bold;">Severity: </span><small id="cvss_severity"></small></small>
+		</div>
+		<br>
+		<div>
+			<small style="float:left;margin-top:-10px;"><span style="font-weight:bold;">Published: </span><span id="cve_published"></span></small>
+			<small style="float:right;margin-top:-10px;"><span style="font-weight:bold;">Modified: </span><small id="cve_modified"></small></small>
+		</div>
+	</div>
+
+	<h4 style="margin-top:5px;">Products Affected</h4>
+	<div id="package_table"></div>
+	<hr>
+	<small style="font-size:10px;margin-top:0px;float:right">Find out more about <span style="font-weight:bold;" id="cve_number"></span> from the <a id="mitre_link">MITRE-CVE</a> dictionary and <a id="nvd_link">NIST NVD</a></small>
+
+	
+  </div>
+</div>
+<!-- **************************************************************************** -->
+
+
+	<div class="flex-container">
+		<div>
+			<select class="select" id="select_group" style="font-size:20px;margin-top:10px;margin-left:50px;float:none;"></select>
+			<select class="select" id="select_product" style="font-size:20px;margin-top:10px;margin-left:50px;float:none;"></select>
+			<select class="select" id="select_version" style="font-size:20px;margin-top:10px;margin-left:50px;float:none;"></select>
+			<button id="load" style="margin-left:50px;font-size:20px;">Load</button>
+		</div>		
+		<div><hr></div>
+		<div id="vulnerability-table"></div>
+	</div>
+	<div id="vulnerability-table"></div>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/4.7.0/js/tabulator.min.js" ></script>
+	<script src="products.json" ></script>
+	<script>
+	PRODUCT_SPECIFIC_CODE
+	columns = 
+	[
+		{title:"CVE", field:"cve", sorter:"string", width:130},
+		{title:"Description", field:"description", sorter:"string", width:500},
+		{title:"Package", field:"component", sorter:"string", width:90},
+		{title:"Status", field:"status.state", sorter:"string", width:100},
+		{title:"Severity", field:"cvss.baseSeverity", sorter:"string", width:90},
+		{title:"Modified", field:"modified", sorter:"string", width:100}
+	];
+	function getJsonFromUrl(url) {
+	  if(!url) url = location.search;
+	  var query = url.substr(1);
+	  var result = {};
+	  query.split("&").forEach(function(part) {
+		var item = part.split("=");
+		result[item[0]] = decodeURIComponent(item[1]);
+	  });
+	  return result;
+	}
+	
+	function PopulateModal(data)
+	{
+		console.log(data);
+		
+		$('#cve_title').text(data.cve);
+		$('#cve_description').text(data.description);
+		var published = new Date(data.published);
+		var published = published.toString().slice(4,15);
+		$('#cve_published').text(published);
+		
+		var modified = new Date(data.modified);
+		var modified = modified.toString().slice(4,15);
+		$('#cve_modified').text(modified);
+		
+		$('#cvss_vector').text(data.cvss.vectorString);
+		$('#cvss_basescore').text(data.cvss.baseScore);
+		
+		if(data.cvss.accessVector !== undefined)
+			$('#cvss_attackvector').text(data.cvss.accessVector);
+		
+		if(data.cvss.attackVector !== undefined)
+			$('#cvss_attackvector').text(data.cvss.attackVector);
+		
+		if(data.cvss.baseSeverity !== undefined)
+			$('#cvss_severity').text(data.cvss.baseSeverity);
+		
+		$('#cve_number').text(data.cve);
+		link = "https://cve.mitre.org/cgi-bin/cvename.cgi?name="+data.cve;
+		$("#mitre_link").attr("href",link);
+		link = "https://nvd.nist.gov/vuln/detail/"+data.cve;
+		$("#nvd_link").attr("href",link);
+		
+		html='<table>';
+		html+='<tr>';
+		html+='<th>Product</th>';
+		html+='<th>Part</th>';
+		html+='<th>Version</th>';
+		html+='<th>Package</th>';
+		html+='<th>Status</th>';
+		html+='<th>Published</th>';
+		html+='</tr>';
+		
+		for(i=0;i<data.product.length;i++)
+		{
+			html+='<tr>';
+			product = data.product[i];
+			html += '<td>'+product.group+'</td><td>'+product.name+"</td><td>"+product.version+'</td>';
+			html += '<td>';
+			for(j=0;j<product.component.length;j++)
+			{
+				component=product.component[j];
+				html += component.name+component.version+' ';
+			}
+			html += '</td>';
+			html += '<td>'+product.status.state+'</td>';
+			if(product.status.publish)
+				html += '<td>Yes</td>';
+			else
+				html += '<td>No</td>';
+			html +='</tr>';
+		}
+		html +='</table>';
+		$('#package_table').empty();
+		$('#package_table').append(html);
+
+	}
+	$('#closemodal').on( "click", function() 
+	{
+		$('#modal').hide();
+	});
+	var group=
+	$(document).ready(function()
+	{
+		console.log("Vulnerability Page Loaded");
+		var urldata = getJsonFromUrl(window.location.href);
+		console.log(urldata);
+		for(i=0;i<data.length;i++)
+		{
+			cve = data[i];
+			for(j=0;j<cve.product.length;j++)
+			{
+				product=cve.product[j];
+				
+				for(k=0;k<product.component.length;k++)
+				{
+					component  = product.component[k];
+					cve.component = component.name;
+					
+				}
+				//cve.status = product.status.state;
+			}
+		}
+		var table = new Tabulator("#vulnerability-table", {
+		columns:columns,
+		pagination:"local",
+		paginationSize:50,
+		//autoColumns:true,
+		layout:"fitDataStretch",
+		data:data,
+		rowClick:function(e, row)
+		{
+			PopulateModal(row.getData());
+			$('#modal').show();
+		},
+		});
+		console.log(data);
+		
+		for(var i in groups)
+		{
+			var group=groups[i];
+			$('#select_group').append('<option value="'+i+'">'+group.name+'</option>');
+		}
+		var group=groups[0];
+		for(var j in group.products)
+		{
+			var product=group.products[j];
+			$('#select_product').append('<option value="'+j+'">'+product.name+'</option>');
+		}
+		var product=group.products[0];
+		for(var k in product.versions)
+		{
+			var version=product.versions[k];
+			$('#select_version').append('<option value="'+k+'">'+version.name+'</option>');
+		}
+	
+		$('#select_group').on('change', function()
+		{
+			var group = groups[$('#select_group').val()];
+			$('#select_product').children().remove();
+			$('#select_version').children().remove();
+			
+			for(var j in group.products)
+			{
+				var product=group.products[j];
+				$('#select_product').append('<option value="'+j+'">'+product.name+'</option>');
+			}
+			var product=group.products[0];
+			for(var k in product.versions)
+			{
+				var version=product.versions[k];
+				$('#select_version').append('<option value="'+k+'">'+version.name+'</option>');
+			}
+		});
+		
+		$('#select_product').on('change', function()
+		{
+			var group = groups[$('#select_group').val()];
+			var product = group.products[$('#select_product').val()];
+			$('#select_version').children().remove();
+			
+			for(var k in product.versions)
+			{
+				var version=product.versions[k];
+				$('#select_version').append('<option value="'+k+'">'+version.name+'</option>');
+			}
+		});
+		$('#load').on('click', function()
+		{
+			var group = groups[$('#select_group').val()];
+			var product = group.products[$('#select_product').val()];
+			var version = product.versions[$('#select_version').val()];
+			console.log(product);
+			console.log($('#select_version').val());
+			window.location.href = group.name+"_"+product.name+"_"+version.name+".html";
+			
+		});
+	});
+  </script>
+</body>
+</html>

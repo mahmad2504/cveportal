@@ -46,7 +46,7 @@ class HomeController extends Controller
 			$c =  new CVE();
 			$data = $c->GetPublished($ids);
 			Cache::Save($key,json_encode($data));
-			Cache::SaveStaticPage($static_file_name,json_encode($data));
+			//Cache::SaveStaticPage($static_file_name,json_encode($data));
 		}
 		return $data;
 	}

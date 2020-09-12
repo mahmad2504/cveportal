@@ -16,6 +16,15 @@ class Cache
 			mkdir($folder, 0, true);
 		return $folder;
 	}
+	public static function SaveStaticProduct($data)
+	{
+		$folder = self::GetCacheFolder();
+		$filename=$folder."/static/product.json";
+		if(!file_exists($folder."/static"))
+			mkdir($folder."/static", 0, true);
+		
+		file_put_contents($filename,$data);
+	}
 	public static function SaveStaticProductData($data)
 	{
 		$folder = self::GetCacheFolder();
@@ -26,7 +35,7 @@ class Cache
 	{
 		$folder = self::GetCacheFolder();
 		$filename=$folder."/".$key.".html";
-		$html = file_get_contents($folder."/index.template");
+		$html = file_get_contents("index.template");
 		
 		$html = str_replace('PRODUCT_SPECIFIC_CODE','var data='.$data.";",$html);
 		//dump($html);
@@ -38,6 +47,15 @@ class Cache
 	{
 		$folder = self::GetCacheFolder();
 		$filename=$folder."/".$key;
+		file_put_contents($filename,$data);
+	}
+	public static function SaveStatic($key,$data)
+	{
+		$folder = self::GetCacheFolder();
+		$filename=$folder."/static/".$key;
+		if(!file_exists($folder."/static"))
+			mkdir($folder."/static", 0, true);
+		
 		file_put_contents($filename,$data);
 	}
 	public static function Load($key)

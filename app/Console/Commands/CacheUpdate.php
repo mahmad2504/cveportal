@@ -67,12 +67,22 @@ class CacheUpdate extends Command
 						$this->GetCVEs($group->name,$product->name,$version->name);
 					}
 				}
+				$this->GetCVEs($group->name,$product->name,'all');
 			}
+			$this->GetCVEs($group->name,'all','all');
 			$data[] = $group;
 		}
-		Cache::SaveStaticProductData(json_encode($data));
+		$this->GetCVEs('all','all','all');
+		//Cache::SaveStaticProductData(json_encode($data));
 		
-		//$products = new Products();
+		$products = new Products();
+		$products = $products->GetProducts();
+		for($i=0;$i<count($products);$i++)
+		{
+			$products[$i]=$products[$i]->jsonSerialize();
+			unset($products[$i]->admin);
+		}
+		Cache::SaveStaticProduct(json_encode($products));
 		//$products->CacheUpdate();
         //$cve = new CVE();
 		//$cve->CacheUpdate();
@@ -88,13 +98,20 @@ class CacheUpdate extends Command
 		$admins = $admin=='all'?null:$admin;
 		$ids = $p->GetIds($group,$product,$version,$admin);
 		sort($ids);
+
 		$key = md5(implode(",",$ids));
 		$data = null;
 		$c =  new CVE();
 		$data = $c->GetPublished($ids);
 		
+		Cache::Save($key.'published',json_encode($data));
+		if(count($ids) == 1)
+		{
+			Cache::SaveStatic($ids[0].".json",json_encode($data));
+		}
+		$data = $c->Get($ids);
 		Cache::Save($key,json_encode($data));
-		Cache::SaveStaticPage($static_file_name,json_encode($data));
+		//Cache::SaveStaticPage($static_file_name,json_encode($data));
 		
 		return $data;
     }

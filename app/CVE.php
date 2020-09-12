@@ -199,7 +199,8 @@ class CVE
 			"cve"=>1]
 		];
 		$query = ['id'=>$product_id];
-		$mlist = $this->db->monitoring_lists->findOne($query);	
+		$mlist = $this->db->monitoring_lists->findOne($query);
+	
 		if($mlist == null)
 		{
 			dd($product_id." is empty");
@@ -305,10 +306,12 @@ class CVE
 		$this->InitDb();
 		$products = new Products();
 		$ids = $products->GetIds();
+	
 		foreach($ids as $id)
 		{
 			$this->BuildCVEs($id);
 		}
+		
 		foreach($this->cves as $cve)
 		{
 			foreach($cve->product as $product)
