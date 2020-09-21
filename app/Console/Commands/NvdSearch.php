@@ -6,7 +6,7 @@ use Illuminate\Console\Command;
 use \MongoDB\Client;
 use \MongoDB\BSON\UTCDateTime;
 
-class NvdImport extends Command
+class NvdSearch extends Command
 {
 	
 	private $urls = null;// Read from config
@@ -20,7 +20,7 @@ class NvdImport extends Command
      *
      * @var string
      */
-    protected $signature = 'nvd:import';
+    protected $signature = 'nvd:search {--package=null} {--ver=null}';
 
     /**
      * The console command description.
@@ -285,7 +285,7 @@ class NvdImport extends Command
 		$obj->package_match = '';
 		$obj->version_match = '';
 		$debug=0;
-		
+		//dd($versionnumber);
 		//if($cve->cve->CVE_data_meta->ID == 'CVE-2009-2044')
 		//	dd($cve);
 		for($i=0;$i < count($cve->configurations->nodes);$i++)
@@ -532,7 +532,16 @@ class NvdImport extends Command
     public function handle()
     {
         //
+		$package = $this->option('package');
+		$version = $this->option('ver');
 		$this->Init();
-		$this->Import();
+		
+		$cves = $this->GetCVEs($package,$version);
+		foreach($cves as $cve)
+		{
+			echo $cve->cve." ".$cve->type->version_match."\n";
+		}
+		
+		//$this->Import();
     }
 }

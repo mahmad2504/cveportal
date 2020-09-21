@@ -76,13 +76,47 @@ class CacheUpdate extends Command
 		//Cache::SaveStaticProductData(json_encode($data));
 		
 		$products = new Products();
-		$products = $products->GetProducts();
-		for($i=0;$i<count($products);$i++)
+		$data = new \StdClass();
+		$data->groups = [];
+		
+		$g = new \StdClass();
+		$g->name = 'All Products';
+		$g->products = [];
+		$p = new \StdClass();
+		$p->name = 'All Parts';
+		$p->versions = [];
+		$v = new \StdClass();
+		$v->id = 'all_all_all';
+		$v->name = 'All Versions';
+		$p->versions[] = $v;
+		$g->products[]= $p;
+       
+		$data->groups[] = $g;
+		$groups = $products->GetGroupNames();
+		foreach($groups as $group)
 		{
-			$products[$i]=$products[$i]->jsonSerialize();
-			unset($products[$i]->admin);
+			$g = new \StdClass();
+			$g->name = $group;
+			$g->products = [];
+			$prdcts = $products->GetProductNames($group);
+			foreach($prdcts as $prdct)
+			{
+				$p = new \StdClass();
+				$p->name = $prdct;
+				$p->versions = [];
+				$versions = $products->GetVersionNames($group,$prdct);
+				foreach($versions as $version)
+		{
+					$v = new \StdClass();
+					$v->name = $version;
+					$v->id = $products->GetIds($group,$prdct,$version)[0];
+					$p->versions[] = $v;
+				}
+				$g->products[] = $p;
 		}
-		Cache::SaveStaticProduct(json_encode($products));
+			$data->groups[] = $g;
+		}
+		Cache::SaveStaticProduct(json_encode($data));
 		//$products->CacheUpdate();
         //$cve = new CVE();
 		//$cve->CacheUpdate();
@@ -92,6 +126,7 @@ class CacheUpdate extends Command
 	{
 		$static_file_name = $group."_".$product."_".$version;
 		$p = new Products();
+		$tag=$group."_".$product."_".$version;
 		$group = $group=='all'?null:$group;
 		$product = $product=='all'?null:$product;
 		$version = $version=='all'?null:$version;
@@ -109,6 +144,9 @@ class CacheUpdate extends Command
 		{
 			Cache::SaveStatic($ids[0].".json",json_encode($data));
 		}
+		else
+			Cache::SaveStatic($tag.".json",json_encode($data));
+		
 		$data = $c->Get($ids);
 		Cache::Save($key,json_encode($data));
 		//Cache::SaveStaticPage($static_file_name,json_encode($data));

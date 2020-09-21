@@ -9,6 +9,7 @@ use \MongoDB\BSON\UTCDateTime;
 use App;
 use App\CVEStatus;
 use App\Products;
+use App\Console\Commands\NvdSearch;
 class CVE
 {
 	private $datafolder = "data/svm";
@@ -190,6 +191,8 @@ class CVE
 	}
 	function BuildCVEs($product_id)
 	{
+		//$nvd = new NvdSearch();
+		//$nvd->Init();
 		$projection = [
 			'projection'=>
 			["_id"=>0,
@@ -208,6 +211,18 @@ class CVE
 		$cpes = $this->db->cpe->find(['id'=>['$in' => $mlist->components]]);
 		foreach($cpes as $component)
 		{
+			/*$nvd_cves =[];
+			if($component->cpe_name != '')
+			{
+				$cpe_fields = explode(":",$component->cpe_name);
+				
+				if(isset($cpe_fields[4]) )
+				{
+					echo $component->cpe_name."\n";
+					$nvd_cves = $nvd->GetCVEs($cpe_fields[3],$cpe_fields[4]);
+				}
+			}*/
+			
 			foreach($component->cve as $cve)
 			{
 				$component_id = $component->id;
@@ -216,6 +231,13 @@ class CVE
 				
 				if(!array_key_exists($cve,$this->cves))
 				{
+					/*if(count($nvd_cves)>0)
+					{
+						if(isset($nvd_cves[$cve]))
+							echo $cve." in nvd"."\n";
+						else
+							echo $cve." not in nvd"."\n";
+					}*/
 					$this->cves[$cve] = new \StdClass();
 					$this->cves[$cve]->cve = $cve;
 					$this->cves[$cve]->product = [];
